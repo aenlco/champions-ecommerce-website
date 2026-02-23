@@ -61,26 +61,14 @@ export default function SignUp() {
     return (
         <PageTransition>
             <div style={{
-                paddingTop: '100px',
                 minHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                justifyContent: 'center',
                 padding: 'clamp(1.5rem, 4vw, 3rem)',
             }}>
                 <div style={{ width: '100%', maxWidth: '420px' }}>
-                    <h1 style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.875rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.2em',
-                        textTransform: 'uppercase',
-                        marginBottom: '2rem',
-                        textAlign: 'center',
-                    }}>
-                        Create Account
-                    </h1>
-
                     {error && (
                         <div style={{
                             padding: '0.75rem 1rem',
