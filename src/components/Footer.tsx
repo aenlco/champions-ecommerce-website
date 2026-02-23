@@ -21,18 +21,7 @@ export default function Footer() {
             >
                 {/* Brand */}
                 <div>
-                    <p
-                        style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.2em',
-                            textTransform: 'uppercase',
-                            marginBottom: '1rem',
-                        }}
-                    >
-                        CHAMPIONS
-                    </p>
+                    <img src="/logo.png" alt="Charles K" style={{ height: '24px', width: 'auto', marginBottom: '1rem' }} />
                     <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-500)', lineHeight: 1.8 }}>
                         Built for those who compete<br />with themselves.
                     </p>
@@ -122,7 +111,7 @@ export default function Footer() {
                 }}
             >
                 <p style={{ fontSize: '0.625rem', letterSpacing: '0.1em', color: 'var(--color-gray-400)' }}>
-                    © {year} CHAMPIONS. ALL RIGHTS RESERVED.
+                    © {year} CHARLES K. ALL RIGHTS RESERVED.
                 </p>
             </div>
         </footer>

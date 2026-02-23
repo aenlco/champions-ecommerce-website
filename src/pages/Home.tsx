@@ -45,18 +45,15 @@ export default function Home() {
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}
                 >
-                    <h1
+                    <img
+                        src="/logo.png"
+                        alt="Charles K"
                         style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 'clamp(2.5rem, 8vw, 7rem)',
-                            fontWeight: 700,
-                            letterSpacing: '0.15em',
-                            lineHeight: 0.95,
-                            textTransform: 'uppercase',
+                            height: 'clamp(3rem, 10vw, 7rem)',
+                            width: 'auto',
+                            margin: '0 auto',
                         }}
-                    >
-                        CHAMPIONS
-                    </h1>
+                    />
 
                     <motion.p
                         initial={{ opacity: 0 }}

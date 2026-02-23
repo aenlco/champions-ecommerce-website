@@ -41,17 +41,8 @@ export default function Header() {
             }}
         >
             {/* Logo */}
-            <Link
-                to="/"
-                style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.8125rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                }}
-            >
-                CHAMPIONS
+            <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+                <img src="/logo.png" alt="Charles K" style={{ height: '28px', width: 'auto' }} />
             </Link>
 
             {/* Nav — Desktop */}
