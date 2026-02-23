@@ -29,7 +29,7 @@ export default function Header() {
                 left: 0,
                 right: 0,
                 zIndex: 100,
-                height: '60px',
+                height: '80px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -42,7 +42,7 @@ export default function Header() {
         >
             {/* Logo */}
             <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-                <img src="/logo.png" alt="Charles K" style={{ height: '40px', width: 'auto' }} />
+                <img src="/logo.png" alt="Charles K" style={{ height: '120px', width: 'auto' }} />
             </Link>
 
             {/* Nav — Desktop (centered) */}
@@ -180,7 +180,7 @@ export default function Header() {
                         className="md:hidden"
                         style={{
                             position: 'fixed',
-                            top: '60px',
+                            top: '80px',
                             left: 0,
                             right: 0,
                             bottom: 0,
