@@ -43,8 +43,8 @@ export default function ProductDetail() {
     const [selectedColor, setSelectedColor] = useState(colors[0] || '')
     const [selectedSize, setSelectedSize] = useState('')
     const [added, setAdded] = useState(false)
-    const [detailsOpen, setDetailsOpen] = useState(false)
-    const [additionalOpen, setAdditionalOpen] = useState(false)
+    const [detailsOpen, setDetailsOpen] = useState(true)
+    const [additionalOpen, setAdditionalOpen] = useState(true)
     const [customPriceDollars, setCustomPriceDollars] = useState('')
 
     // Sync selectedColor when variants load
@@ -97,15 +97,10 @@ export default function ProductDetail() {
     return (
         <PageTransition>
             <div style={{ paddingTop: '60px', minHeight: '100vh' }}>
-                {/* Split Layout */}
+                {/* Split Layout — use className only for grid so responsive works */}
                 <div
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr',
-                        maxWidth: '1400px',
-                        margin: '0 auto',
-                    }}
-                    className="md:grid-cols-[1.2fr_1fr]"
+                    className="grid grid-cols-1 md:grid-cols-[1fr_1fr]"
+                    style={{ maxWidth: '1400px', margin: '0 auto' }}
                 >
                     {/* Left: Single Image */}
                     <div
@@ -154,8 +149,7 @@ export default function ProductDetail() {
                     {/* Right: Product Info */}
                     <div
                         style={{
-                            padding: 'clamp(1.5rem, 4vw, 3rem)',
-                            borderLeft: '1px solid rgba(0,0,0,0.04)',
+                            padding: 'clamp(1.5rem, 3vw, 2.5rem)',
                         }}
                     >
                         {/* Name + Price */}
@@ -163,14 +157,14 @@ export default function ProductDetail() {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'baseline',
-                            paddingBottom: '1.5rem',
-                            marginBottom: '1.5rem',
-                            borderBottom: '1px solid rgba(0,0,0,0.06)',
+                            paddingBottom: '1.25rem',
+                            marginBottom: '1.25rem',
+                            borderBottom: '1px solid rgba(0,0,0,0.08)',
                         }}>
                             <h1
                                 style={{
                                     fontFamily: 'var(--font-mono)',
-                                    fontSize: '0.8125rem',
+                                    fontSize: '0.75rem',
                                     fontWeight: 700,
                                     letterSpacing: '0.1em',
                                     textTransform: 'uppercase',
@@ -181,7 +175,7 @@ export default function ProductDetail() {
                                 {product.name}
                             </h1>
                             <span style={{
-                                fontSize: '0.8125rem',
+                                fontSize: '0.75rem',
                                 fontWeight: 500,
                                 whiteSpace: 'nowrap',
                             }}>
@@ -190,21 +184,24 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Size Dropdown */}
-                        <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ marginBottom: '0.75rem' }}>
                             <select
                                 value={selectedSize}
                                 onChange={e => setSelectedSize(e.target.value)}
                                 style={{
                                     width: '100%',
-                                    padding: '0.75rem 1rem',
-                                    border: '1px solid rgba(0,0,0,0.12)',
-                                    fontSize: '0.75rem',
+                                    padding: '0.625rem 1rem',
+                                    borderTop: 'none',
+                                    borderLeft: 'none',
+                                    borderRight: 'none',
+                                    borderBottom: '1px solid rgba(0,0,0,0.12)',
+                                    fontSize: '0.6875rem',
                                     letterSpacing: '0.1em',
                                     textTransform: 'uppercase',
                                     appearance: 'none',
-                                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E")`,
+                                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E")`,
                                     backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'right 1rem center',
+                                    backgroundPosition: 'right 0 center',
                                     cursor: 'pointer',
                                     backgroundColor: 'transparent',
                                 }}
@@ -220,21 +217,24 @@ export default function ProductDetail() {
 
                         {/* Color selector — only show if multiple colors */}
                         {colors.length > 1 && (
-                            <div style={{ marginBottom: '1rem' }}>
+                            <div style={{ marginBottom: '0.75rem' }}>
                                 <select
                                     value={selectedColor}
                                     onChange={e => { setSelectedColor(e.target.value); setSelectedSize('') }}
                                     style={{
                                         width: '100%',
-                                        padding: '0.75rem 1rem',
-                                        border: '1px solid rgba(0,0,0,0.12)',
-                                        fontSize: '0.75rem',
+                                        padding: '0.625rem 1rem',
+                                        borderTop: 'none',
+                                        borderLeft: 'none',
+                                        borderRight: 'none',
+                                        borderBottom: '1px solid rgba(0,0,0,0.12)',
+                                        fontSize: '0.6875rem',
                                         letterSpacing: '0.1em',
                                         textTransform: 'uppercase',
                                         appearance: 'none',
-                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E")`,
+                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E")`,
                                         backgroundRepeat: 'no-repeat',
-                                        backgroundPosition: 'right 1rem center',
+                                        backgroundPosition: 'right 0 center',
                                         cursor: 'pointer',
                                         backgroundColor: 'transparent',
                                     }}
@@ -248,19 +248,20 @@ export default function ProductDetail() {
 
                         {/* Sizing Note */}
                         <p style={{
-                            fontSize: '0.6875rem',
+                            fontSize: '0.625rem',
                             color: 'var(--color-gray-500)',
-                            marginBottom: '0.5rem',
+                            marginTop: '0.75rem',
+                            marginBottom: '0.25rem',
                         }}>
                             Unisex style. Women should consider ordering 1 size smaller.
                         </p>
                         <p style={{
-                            fontSize: '0.625rem',
+                            fontSize: '0.5625rem',
                             letterSpacing: '0.15em',
                             textTransform: 'uppercase',
                             textDecoration: 'underline',
                             textUnderlineOffset: '3px',
-                            marginBottom: '1.5rem',
+                            marginBottom: '1.25rem',
                             cursor: 'pointer',
                         }}>
                             SIZE GUIDE
@@ -268,7 +269,7 @@ export default function ProductDetail() {
 
                         {/* PWYW Price Input */}
                         {product.pay_what_you_want && (
-                            <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={{ marginBottom: '1.25rem' }}>
                                 <p className="text-label" style={{ marginBottom: '0.75rem', color: 'var(--color-gray-500)' }}>
                                     Name Your Price (minimum {formatPrice(product.price)} USD)
                                 </p>
@@ -319,27 +320,27 @@ export default function ProductDetail() {
                             disabled={!selectedVariant || (product.pay_what_you_want && !isCustomPriceValid)}
                             style={{
                                 width: '100%',
-                                padding: '1rem',
+                                padding: '0.875rem',
                                 backgroundColor: added ? 'var(--color-gray-800)' : 'var(--color-black)',
                                 color: 'var(--color-white)',
-                                fontSize: '0.6875rem',
+                                fontSize: '0.625rem',
                                 fontWeight: 600,
                                 letterSpacing: '0.2em',
                                 textTransform: 'uppercase',
                                 opacity: selectedVariant && isCustomPriceValid ? 1 : 0.4,
                                 cursor: selectedVariant && isCustomPriceValid ? 'pointer' : 'not-allowed',
                                 transition: 'all 0.3s ease',
-                                marginBottom: '2rem',
+                                marginBottom: '1.5rem',
                             }}
                         >
-                            {added ? '✓ ADDED TO BAG' :
+                            {added ? 'ADDED TO BAG' :
                                 !selectedSize ? 'SELECT SIZE' :
                                     !selectedVariant ? 'OUT OF STOCK' :
                                         'ADD TO BAG'}
                         </motion.button>
 
                         {/* DETAILS — Expandable */}
-                        <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                        <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
                             <button
                                 onClick={() => setDetailsOpen(!detailsOpen)}
                                 style={{
@@ -347,8 +348,8 @@ export default function ProductDetail() {
                                     display: 'flex',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
-                                    padding: '1.25rem 0',
-                                    fontSize: '0.6875rem',
+                                    padding: '1rem 0',
+                                    fontSize: '0.625rem',
                                     fontWeight: 600,
                                     letterSpacing: '0.15em',
                                     textTransform: 'uppercase',
@@ -358,12 +359,12 @@ export default function ProductDetail() {
                                 <span style={{
                                     transform: detailsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                                     transition: 'transform 0.3s ease',
-                                    fontSize: '0.75rem',
+                                    fontSize: '0.625rem',
                                 }}>
                                     ▾
                                 </span>
                             </button>
-                            <AnimatePresence>
+                            <AnimatePresence initial={false}>
                                 {detailsOpen && (
                                     <motion.div
                                         initial={{ height: 0, opacity: 0 }}
@@ -372,17 +373,17 @@ export default function ProductDetail() {
                                         transition={{ duration: 0.3 }}
                                         style={{ overflow: 'hidden' }}
                                     >
-                                        <div style={{ paddingBottom: '1.5rem' }}>
+                                        <div style={{ paddingBottom: '1.25rem' }}>
                                             <p style={{
-                                                fontSize: '0.75rem',
+                                                fontSize: '0.6875rem',
                                                 color: 'var(--color-gray-500)',
-                                                marginBottom: '1rem',
+                                                marginBottom: '0.75rem',
                                             }}>
                                                 This item is final sale and not eligible for return or exchange.
                                             </p>
                                             <div style={{
-                                                fontSize: '0.75rem',
-                                                lineHeight: 2,
+                                                fontSize: '0.6875rem',
+                                                lineHeight: 1.8,
                                                 color: 'var(--color-gray-600)',
                                             }}>
                                                 {product.description.split('\n').map((line, i) => (
@@ -400,7 +401,7 @@ export default function ProductDetail() {
                         </div>
 
                         {/* ADDITIONAL INFO — Expandable */}
-                        <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                        <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
                             <button
                                 onClick={() => setAdditionalOpen(!additionalOpen)}
                                 style={{
@@ -408,8 +409,8 @@ export default function ProductDetail() {
                                     display: 'flex',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
-                                    padding: '1.25rem 0',
-                                    fontSize: '0.6875rem',
+                                    padding: '1rem 0',
+                                    fontSize: '0.625rem',
                                     fontWeight: 600,
                                     letterSpacing: '0.15em',
                                     textTransform: 'uppercase',
@@ -419,12 +420,12 @@ export default function ProductDetail() {
                                 <span style={{
                                     transform: additionalOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                                     transition: 'transform 0.3s ease',
-                                    fontSize: '0.75rem',
+                                    fontSize: '0.625rem',
                                 }}>
                                     ▾
                                 </span>
                             </button>
-                            <AnimatePresence>
+                            <AnimatePresence initial={false}>
                                 {additionalOpen && (
                                     <motion.div
                                         initial={{ height: 0, opacity: 0 }}
@@ -433,11 +434,11 @@ export default function ProductDetail() {
                                         transition={{ duration: 0.3 }}
                                         style={{ overflow: 'hidden' }}
                                     >
-                                        <div style={{ paddingBottom: '1.5rem' }}>
+                                        <div style={{ paddingBottom: '1.25rem' }}>
                                             <p style={{
-                                                fontSize: '0.75rem',
+                                                fontSize: '0.6875rem',
                                                 color: 'var(--color-gray-600)',
-                                                marginBottom: '0.75rem',
+                                                marginBottom: '0.5rem',
                                             }}>
                                                 Questions?{' '}
                                                 <span style={{
@@ -447,12 +448,13 @@ export default function ProductDetail() {
                                                     textDecoration: 'underline',
                                                     textUnderlineOffset: '3px',
                                                     cursor: 'pointer',
+                                                    marginLeft: '0.5rem',
                                                 }}>
                                                     CONTACT US
                                                 </span>
                                             </p>
                                             <p style={{
-                                                fontSize: '0.75rem',
+                                                fontSize: '0.6875rem',
                                                 color: 'var(--color-gray-600)',
                                             }}>
                                                 Free Shipping on orders over $100. Free returns.{' '}
@@ -463,6 +465,7 @@ export default function ProductDetail() {
                                                     textDecoration: 'underline',
                                                     textUnderlineOffset: '3px',
                                                     cursor: 'pointer',
+                                                    marginLeft: '0.5rem',
                                                 }}>
                                                     LEARN MORE
                                                 </span>
@@ -475,45 +478,37 @@ export default function ProductDetail() {
 
                         {/* View More Links */}
                         <div style={{
-                            borderTop: '1px solid rgba(0,0,0,0.06)',
-                            paddingTop: '1.5rem',
+                            borderTop: '1px solid rgba(0,0,0,0.08)',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '1rem',
                         }}>
                             <Link
                                 to={`/shop?category=${encodeURIComponent(product.category)}`}
                                 style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
+                                    display: 'block',
                                     fontSize: '0.625rem',
                                     letterSpacing: '0.15em',
                                     textTransform: 'uppercase',
-                                    fontWeight: 600,
-                                    paddingBottom: '1rem',
-                                    borderBottom: '1px solid rgba(0,0,0,0.06)',
+                                    fontWeight: 500,
+                                    padding: '1rem 0',
+                                    borderBottom: '1px solid rgba(0,0,0,0.08)',
                                 }}
                             >
-                                <span>VIEW MORE FROM <strong>{product.name.split(' ')[0].toUpperCase()}</strong></span>
-                                <span style={{ fontSize: '0.75rem' }}>&rarr;</span>
+                                VIEW MORE FROM <strong>{product.name.split(' ')[0].toUpperCase()}</strong>
                             </Link>
                             <Link
                                 to={`/shop?category=${encodeURIComponent(product.category)}`}
                                 style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
+                                    display: 'block',
                                     fontSize: '0.625rem',
                                     letterSpacing: '0.15em',
                                     textTransform: 'uppercase',
-                                    fontWeight: 600,
-                                    paddingBottom: '1rem',
-                                    borderBottom: '1px solid rgba(0,0,0,0.06)',
+                                    fontWeight: 500,
+                                    padding: '1rem 0',
+                                    borderBottom: '1px solid rgba(0,0,0,0.08)',
                                 }}
                             >
-                                <span>VIEW MORE FROM <strong>{product.category.toUpperCase()}</strong></span>
-                                <span style={{ fontSize: '0.75rem' }}>&rarr;</span>
+                                VIEW MORE FROM <strong>{product.category.toUpperCase()}</strong>
                             </Link>
                         </div>
                     </div>
