@@ -7,6 +7,7 @@ export interface Product {
     images: string[]
     category: string
     is_active: boolean
+    pay_what_you_want: boolean
     created_at: string
 }
 
@@ -23,12 +24,13 @@ export interface CartItem {
     product: Product
     variant: ProductVariant
     quantity: number
+    customPrice?: number
 }
 
 export interface Order {
     id: string
     user_id: string | null
-    stripe_session_id: string
+    square_payment_id: string
     status: string
     total: number
     shipping_address: ShippingAddress
@@ -43,4 +45,12 @@ export interface ShippingAddress {
     state: string
     postal_code: string
     country: string
+}
+
+export interface UserProfile {
+    id: string
+    email: string | null
+    phone: string | null
+    full_name: string | null
+    created_at: string
 }

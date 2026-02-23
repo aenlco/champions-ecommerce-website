@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '@/components/PageTransition'
 import { useCart } from '@/context/CartContext'
+import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
+import SquarePaymentForm from '@/components/SquarePaymentForm'
+import type { SquarePaymentFormHandle } from '@/components/SquarePaymentForm'
 
 export default function Checkout() {
-    const { items, subtotal, clearCart } = useCart()
     const navigate = useNavigate()
+    const { items, subtotal, clearCart } = useCart()
+    const { user } = useAuth()
+    const paymentFormRef = useRef<SquarePaymentFormHandle>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [form, setForm] = useState({
-        email: '',
+        email: user?.email || '',
         full_name: '',
         line1: '',
         line2: '',
@@ -28,22 +33,27 @@ export default function Checkout() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (items.length === 0) return
+        if (items.length === 0 || !paymentFormRef.current) return
 
         setLoading(true)
         setError(null)
 
         try {
+            const token = await paymentFormRef.current.tokenize()
+            if (!token) throw new Error('Failed to tokenize card')
+
             const payload = {
+                source_id: token,
                 items: items.map(item => ({
                     product_id: item.product.id,
                     product_name: item.product.name,
                     variant_id: item.variant.id,
                     size: item.variant.size,
                     color: item.variant.color,
-                    unit_price: item.product.price,
+                    unit_price: item.customPrice ?? item.product.price,
                     quantity: item.quantity,
                 })),
+                amount: subtotal,
                 shipping_address: {
                     full_name: form.full_name,
                     line1: form.line1,
@@ -54,24 +64,21 @@ export default function Checkout() {
                     country: form.country,
                 },
                 email: form.email,
-                origin: window.location.origin,
+                user_id: user?.id ?? null,
             }
 
             const { data, error: fnError } = await supabase.functions.invoke(
-                'create-checkout-session',
+                'create-square-payment',
                 { body: payload }
             )
 
             if (fnError) throw fnError
-            if (data?.url) {
-                clearCart()
-                window.location.href = data.url
-            } else {
-                throw new Error('No checkout URL returned')
-            }
+
+            clearCart()
+            navigate(`/order-success?payment_id=${data.payment_id}`)
         } catch (err: any) {
             console.error('Checkout error:', err)
-            setError(err.message || 'Something went wrong. Please try again.')
+            setError(err.message || 'Payment failed. Please try again.')
             setLoading(false)
         }
     }
@@ -94,7 +101,7 @@ export default function Checkout() {
                         Your bag is empty
                     </p>
                     <a
-                        href="/collections"
+                        href="/shop"
                         style={{
                             fontSize: '0.625rem',
                             letterSpacing: '0.15em',
@@ -190,28 +197,12 @@ export default function Checkout() {
                                 </div>
                             </div>
 
-                            {/* Payment Info */}
+                            {/* Payment — Square */}
                             <div style={{ marginBottom: '2rem' }}>
                                 <p className="text-label" style={{ marginBottom: '1rem', color: 'var(--color-gray-500)' }}>
                                     Payment
                                 </p>
-                                <div
-                                    style={{
-                                        padding: '1.25rem',
-                                        border: '1px solid rgba(0,0,0,0.08)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.75rem',
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.4, flexShrink: 0 }}>
-                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                                        <line x1="1" y1="10" x2="23" y2="10" />
-                                    </svg>
-                                    <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-400)', letterSpacing: '0.05em' }}>
-                                        You'll be redirected to Stripe's secure checkout
-                                    </p>
-                                </div>
+                                <SquarePaymentForm ref={paymentFormRef} disabled={loading} />
                             </div>
 
                             <button
@@ -231,7 +222,7 @@ export default function Checkout() {
                                     transition: 'opacity 0.2s',
                                 }}
                             >
-                                {loading ? 'REDIRECTING TO STRIPE...' : `PAY ${formatPrice(subtotal)}`}
+                                {loading ? 'PROCESSING PAYMENT...' : `PAY ${formatPrice(subtotal)}`}
                             </button>
                         </form>
                     </div>
@@ -272,7 +263,7 @@ export default function Checkout() {
                                         </p>
                                     </div>
                                     <span style={{ fontSize: '0.75rem' }}>
-                                        {formatPrice(item.product.price * item.quantity)}
+                                        {formatPrice((item.customPrice ?? item.product.price) * item.quantity)}
                                     </span>
                                 </div>
                             ))}

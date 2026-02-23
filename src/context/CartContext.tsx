@@ -3,7 +3,7 @@ import type { CartItem, Product, ProductVariant } from '@/lib/types'
 
 interface CartContextType {
     items: CartItem[]
-    addItem: (product: Product, variant: ProductVariant, quantity?: number) => void
+    addItem: (product: Product, variant: ProductVariant, quantity?: number, customPrice?: number) => void
     removeItem: (variantId: string) => void
     updateQuantity: (variantId: string, quantity: number) => void
     clearCart: () => void
@@ -40,17 +40,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
         saveCart(items)
     }, [items])
 
-    const addItem = useCallback((product: Product, variant: ProductVariant, quantity = 1) => {
+    const addItem = useCallback((product: Product, variant: ProductVariant, quantity = 1, customPrice?: number) => {
         setItems(prev => {
             const existing = prev.find(item => item.variant.id === variant.id)
             if (existing) {
                 return prev.map(item =>
                     item.variant.id === variant.id
-                        ? { ...item, quantity: item.quantity + quantity }
+                        ? { ...item, quantity: item.quantity + quantity, customPrice: customPrice ?? item.customPrice }
                         : item
                 )
             }
-            return [...prev, { product, variant, quantity }]
+            return [...prev, { product, variant, quantity, customPrice }]
         })
         setIsCartOpen(true)
     }, [])
@@ -76,7 +76,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
-    const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+    const subtotal = items.reduce((sum, item) => {
+        const unitPrice = item.customPrice ?? item.product.price
+        return sum + unitPrice * item.quantity
+    }, 0)
 
     const openCart = useCallback(() => setIsCartOpen(true), [])
     const closeCart = useCallback(() => setIsCartOpen(false), [])

@@ -80,7 +80,7 @@ export default function Home() {
                         style={{ marginTop: '3rem' }}
                     >
                         <Link
-                            to="/collections"
+                            to="/shop"
                             style={{
                                 display: 'inline-block',
                                 padding: '0.875rem 2.5rem',
@@ -153,7 +153,7 @@ export default function Home() {
                         Featured
                     </h2>
                     <Link
-                        to="/collections"
+                        to="/shop"
                         style={{
                             fontSize: '0.625rem',
                             letterSpacing: '0.15em',
@@ -176,7 +176,7 @@ export default function Home() {
                     }}
                 >
                     {[1, 2, 3].map(i => (
-                        <Link to="/collections" key={i}>
+                        <Link to="/shop" key={i}>
                             <motion.div
                                 whileHover={{ y: -4 }}
                                 transition={{ duration: 0.3 }}
