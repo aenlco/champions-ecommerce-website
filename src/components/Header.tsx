@@ -42,7 +42,7 @@ export default function Header() {
         >
             {/* Logo */}
             <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-                <img src="/logo.png" alt="Charles K" style={{ height: '120px', width: 'auto' }} />
+                <img src="/logo.png" alt="Charles K" style={{ height: '80px', width: 'auto' }} />
             </Link>
 
             {/* Nav — Desktop (centered) */}
