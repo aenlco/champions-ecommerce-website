@@ -63,35 +63,34 @@ export default function Header() {
                 }}
                 className="hidden md:flex"
             >
-                {['SHOP', 'ABOUT'].map(link => (
-                    <Link
-                        key={link}
-                        to={`/${link.toLowerCase()}`}
-                        style={{
-                            fontSize: '0.6875rem',
-                            letterSpacing: '0.15em',
-                            fontWeight: 500,
-                            textTransform: 'uppercase',
-                            opacity: location.pathname === `/${link.toLowerCase()}` ? 1 : 0.6,
-                            transition: 'opacity 0.2s ease',
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                        onMouseLeave={e => {
-                            if (location.pathname !== `/${link.toLowerCase()}`) {
-                                e.currentTarget.style.opacity = '0.6'
-                            }
-                        }}
-                    >
-                        {link}
-                    </Link>
-                ))}
                 <Link
-                    to={user ? '/account' : '/sign-in'}
+                    to="/shop"
                     style={{
                         fontSize: '0.6875rem',
                         letterSpacing: '0.15em',
                         fontWeight: 500,
                         textTransform: 'uppercase',
+                        opacity: location.pathname === '/shop' ? 1 : 0.6,
+                        transition: 'opacity 0.2s ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={e => {
+                        if (location.pathname !== '/shop') {
+                            e.currentTarget.style.opacity = '0.6'
+                        }
+                    }}
+                >
+                    SHOP
+                </Link>
+            </nav>
+
+            {/* Right: Profile + Cart + Mobile Hamburger */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <Link
+                    to={user ? '/account' : '/sign-in'}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         opacity: ['/account', '/sign-in'].includes(location.pathname) ? 1 : 0.6,
                         transition: 'opacity 0.2s ease',
                     }}
@@ -101,13 +100,13 @@ export default function Header() {
                             e.currentTarget.style.opacity = '0.6'
                         }
                     }}
+                    aria-label={user ? 'Account' : 'Sign in'}
                 >
-                    {user ? 'ACCOUNT' : 'SIGN IN'}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
                 </Link>
-            </nav>
-
-            {/* Right: Cart + Mobile Hamburger */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                 <button
                     onClick={toggleCart}
                     style={{
@@ -200,30 +199,27 @@ export default function Header() {
                             gap: '2.5rem',
                         }}
                     >
-                        {['SHOP', 'ABOUT'].map((link, i) => (
-                            <motion.div
-                                key={link}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.1, duration: 0.4 }}
-                            >
-                                <Link
-                                    to={`/${link.toLowerCase()}`}
-                                    style={{
-                                        fontSize: '0.875rem',
-                                        letterSpacing: '0.2em',
-                                        fontWeight: 500,
-                                        textTransform: 'uppercase',
-                                    }}
-                                >
-                                    {link}
-                                </Link>
-                            </motion.div>
-                        ))}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.4 }}
+                            transition={{ delay: 0, duration: 0.4 }}
+                        >
+                            <Link
+                                to="/shop"
+                                style={{
+                                    fontSize: '0.875rem',
+                                    letterSpacing: '0.2em',
+                                    fontWeight: 500,
+                                    textTransform: 'uppercase',
+                                }}
+                            >
+                                SHOP
+                            </Link>
+                        </motion.div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1, duration: 0.4 }}
                         >
                             <Link
                                 to={user ? '/account' : '/sign-in'}

@@ -110,7 +110,6 @@ export default function ProductDetail() {
                     {/* Left: Single Image */}
                     <div
                         style={{
-                            padding: 'clamp(1.5rem, 4vw, 3rem)',
                             position: 'sticky',
                             top: '60px',
                             alignSelf: 'start',
@@ -164,12 +163,14 @@ export default function ProductDetail() {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'baseline',
-                            marginBottom: '2rem',
+                            paddingBottom: '1.5rem',
+                            marginBottom: '1.5rem',
+                            borderBottom: '1px solid rgba(0,0,0,0.06)',
                         }}>
                             <h1
                                 style={{
                                     fontFamily: 'var(--font-mono)',
-                                    fontSize: '1.125rem',
+                                    fontSize: '0.8125rem',
                                     fontWeight: 700,
                                     letterSpacing: '0.1em',
                                     textTransform: 'uppercase',
@@ -180,7 +181,7 @@ export default function ProductDetail() {
                                 {product.name}
                             </h1>
                             <span style={{
-                                fontSize: '1rem',
+                                fontSize: '0.8125rem',
                                 fontWeight: 500,
                                 whiteSpace: 'nowrap',
                             }}>
@@ -376,17 +377,22 @@ export default function ProductDetail() {
                                                 fontSize: '0.75rem',
                                                 color: 'var(--color-gray-500)',
                                                 marginBottom: '1rem',
-                                                fontStyle: 'italic',
                                             }}>
                                                 This item is final sale and not eligible for return or exchange.
                                             </p>
-                                            <p style={{
-                                                fontSize: '0.8125rem',
-                                                lineHeight: 1.8,
+                                            <div style={{
+                                                fontSize: '0.75rem',
+                                                lineHeight: 2,
                                                 color: 'var(--color-gray-600)',
                                             }}>
-                                                {product.description}
-                                            </p>
+                                                {product.description.split('\n').map((line, i) => (
+                                                    <p key={i} style={{
+                                                        fontWeight: line.startsWith('Made in') || line.startsWith('Material') ? 700 : 400,
+                                                    }}>
+                                                        {line}
+                                                    </p>
+                                                ))}
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
@@ -467,20 +473,47 @@ export default function ProductDetail() {
                             </AnimatePresence>
                         </div>
 
-                        {/* View More From Category */}
-                        <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '1.5rem' }}>
+                        {/* View More Links */}
+                        <div style={{
+                            borderTop: '1px solid rgba(0,0,0,0.06)',
+                            paddingTop: '1.5rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1rem',
+                        }}>
                             <Link
                                 to={`/shop?category=${encodeURIComponent(product.category)}`}
                                 style={{
-                                    display: 'block',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
                                     fontSize: '0.625rem',
                                     letterSpacing: '0.15em',
                                     textTransform: 'uppercase',
-                                    textDecoration: 'underline',
-                                    textUnderlineOffset: '3px',
+                                    fontWeight: 600,
+                                    paddingBottom: '1rem',
+                                    borderBottom: '1px solid rgba(0,0,0,0.06)',
                                 }}
                             >
-                                VIEW MORE FROM {product.category.toUpperCase()}
+                                <span>VIEW MORE FROM <strong>{product.name.split(' ')[0].toUpperCase()}</strong></span>
+                                <span style={{ fontSize: '0.75rem' }}>&rarr;</span>
+                            </Link>
+                            <Link
+                                to={`/shop?category=${encodeURIComponent(product.category)}`}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    fontSize: '0.625rem',
+                                    letterSpacing: '0.15em',
+                                    textTransform: 'uppercase',
+                                    fontWeight: 600,
+                                    paddingBottom: '1rem',
+                                    borderBottom: '1px solid rgba(0,0,0,0.06)',
+                                }}
+                            >
+                                <span>VIEW MORE FROM <strong>{product.category.toUpperCase()}</strong></span>
+                                <span style={{ fontSize: '0.75rem' }}>&rarr;</span>
                             </Link>
                         </div>
                     </div>
