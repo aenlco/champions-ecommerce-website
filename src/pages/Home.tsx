@@ -49,7 +49,7 @@ export default function Home() {
                         src="/logo.png"
                         alt="Charles K"
                         style={{
-                            height: 'clamp(3rem, 10vw, 7rem)',
+                            height: 'clamp(4rem, 14vw, 10rem)',
                             width: 'auto',
                             margin: '0 auto',
                         }}
