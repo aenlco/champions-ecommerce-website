@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import PageTransition from '@/components/PageTransition'
 import { useCart } from '@/context/CartContext'
 import { supabase } from '@/lib/supabase'
 
 export default function Checkout() {
     const { items, subtotal, clearCart } = useCart()
-    const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [form, setForm] = useState({
