@@ -45,7 +45,7 @@ export default function Footer() {
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                         {[
-                            { label: 'Collections', to: '/collections' },
+                            { label: 'Shop', to: '/shop' },
                             { label: 'About', to: '/about' },
                         ].map(link => (
                             <Link

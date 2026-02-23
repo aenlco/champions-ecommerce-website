@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import PageTransition from '@/components/PageTransition'
 import { useProduct } from '@/hooks/useProducts'
 import { useCart } from '@/context/CartContext'
@@ -16,6 +16,7 @@ const FALLBACK_PRODUCT = {
     images: [],
     category: 'Tops',
     is_active: true,
+    pay_what_you_want: false,
     created_at: '',
 }
 
@@ -41,25 +42,42 @@ export default function ProductDetail() {
     const colors = [...new Set(variants.map(v => v.color))]
     const [selectedColor, setSelectedColor] = useState(colors[0] || '')
     const [selectedSize, setSelectedSize] = useState('')
-    const [quantity, setQuantity] = useState(1)
     const [added, setAdded] = useState(false)
+    const [detailsOpen, setDetailsOpen] = useState(false)
+    const [additionalOpen, setAdditionalOpen] = useState(false)
+    const [customPriceDollars, setCustomPriceDollars] = useState('')
 
-    // Sync selectedColor when variants load from DB or change
+    // Sync selectedColor when variants load
     useEffect(() => {
         if (colors.length > 0 && (!selectedColor || !colors.includes(selectedColor))) {
             setSelectedColor(colors[0])
-            setSelectedSize('') // Reset size when color changes/resets
+            setSelectedSize('')
         }
-    }, [variants]) // variants dependency ensures this runs when data loads
+    }, [variants])
+
+    // Init custom price display when product loads
+    useEffect(() => {
+        if (product.pay_what_you_want) {
+            setCustomPriceDollars((product.price / 100).toFixed(2))
+        }
+    }, [product.pay_what_you_want, product.price])
 
     const sizesForColor = variants.filter(v => v.color === selectedColor)
     const selectedVariant = variants.find(v => v.color === selectedColor && v.size === selectedSize)
 
-    const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`
+    const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`
+
+    const customPriceCents = Math.round(parseFloat(customPriceDollars || '0') * 100)
+    const isCustomPriceValid = !product.pay_what_you_want || customPriceCents >= product.price
 
     const handleAdd = () => {
         if (!selectedVariant) return
-        addItem(product, selectedVariant, quantity)
+        addItem(
+            product,
+            selectedVariant,
+            1,
+            product.pay_what_you_want ? customPriceCents : undefined
+        )
         setAdded(true)
         setTimeout(() => setAdded(false), 2000)
     }
@@ -79,29 +97,6 @@ export default function ProductDetail() {
     return (
         <PageTransition>
             <div style={{ paddingTop: '60px', minHeight: '100vh' }}>
-                {/* Breadcrumb */}
-                <div
-                    style={{
-                        padding: '1rem clamp(1.5rem, 4vw, 3rem)',
-                        borderBottom: '1px solid rgba(0,0,0,0.04)',
-                    }}
-                >
-                    <div style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        fontSize: '0.5625rem',
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        color: 'var(--color-gray-400)',
-                        maxWidth: '1400px',
-                        margin: '0 auto',
-                    }}>
-                        <Link to="/collections" style={{ textDecoration: 'underline', textUnderlineOffset: '2px' }}>Collections</Link>
-                        <span>/</span>
-                        <span style={{ color: 'var(--color-black)' }}>{product.name}</span>
-                    </div>
-                </div>
-
                 {/* Split Layout */}
                 <div
                     style={{
@@ -110,9 +105,9 @@ export default function ProductDetail() {
                         maxWidth: '1400px',
                         margin: '0 auto',
                     }}
-                    className="md:grid-cols-[1.4fr_1fr]"
+                    className="md:grid-cols-[1.2fr_1fr]"
                 >
-                    {/* Left: Images */}
+                    {/* Left: Single Image */}
                     <div
                         style={{
                             padding: 'clamp(1.5rem, 4vw, 3rem)',
@@ -123,38 +118,37 @@ export default function ProductDetail() {
                     >
                         <div
                             style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.75rem',
+                                aspectRatio: '3/4',
+                                backgroundColor: 'var(--color-gray-100)',
+                                overflow: 'hidden',
+                                position: 'relative',
                             }}
                         >
-                            {(product.images?.length > 0 ? product.images : [null, null]).map((img, i) => (
-                                <div
-                                    key={i}
-                                    style={{
-                                        aspectRatio: '4/5',
-                                        backgroundColor: 'var(--color-gray-100)',
-                                        overflow: 'hidden',
-                                        position: 'relative',
-                                    }}
-                                >
-                                    {img ? (
-                                        <img src={img} alt={`${product.name} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{
-                                                fontFamily: 'var(--font-mono)',
-                                                fontSize: '0.5625rem',
-                                                letterSpacing: '0.2em',
-                                                color: 'var(--color-gray-300)',
-                                                textTransform: 'uppercase',
-                                            }}>
-                                                {i === 0 ? 'Front' : 'Back'}
-                                            </span>
-                                        </div>
-                                    )}
+                            {product.images?.[0] ? (
+                                <img
+                                    src={product.images[0]}
+                                    alt={product.name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <div style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
+                                    <span style={{
+                                        fontFamily: 'var(--font-mono)',
+                                        fontSize: '0.5625rem',
+                                        letterSpacing: '0.2em',
+                                        color: 'var(--color-gray-300)',
+                                        textTransform: 'uppercase',
+                                    }}>
+                                        Product Image
+                                    </span>
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
 
@@ -165,129 +159,163 @@ export default function ProductDetail() {
                             borderLeft: '1px solid rgba(0,0,0,0.04)',
                         }}
                     >
-                        <h1
-                            style={{
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '1.125rem',
-                                fontWeight: 700,
-                                letterSpacing: '0.1em',
-                                textTransform: 'uppercase',
-                                marginBottom: '0.5rem',
-                            }}
-                        >
-                            {product.name}
-                        </h1>
-                        <p style={{ fontSize: '1rem', fontWeight: 500, marginBottom: '2rem' }}>
-                            {formatPrice(product.price)}
-                        </p>
+                        {/* Name + Price */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            marginBottom: '2rem',
+                        }}>
+                            <h1
+                                style={{
+                                    fontFamily: 'var(--font-mono)',
+                                    fontSize: '1.125rem',
+                                    fontWeight: 700,
+                                    letterSpacing: '0.1em',
+                                    textTransform: 'uppercase',
+                                    flex: 1,
+                                    marginRight: '1rem',
+                                }}
+                            >
+                                {product.name}
+                            </h1>
+                            <span style={{
+                                fontSize: '1rem',
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap',
+                            }}>
+                                {formatPrice(product.price)} USD
+                            </span>
+                        </div>
 
-                        {/* Color */}
-                        {colors.length > 0 && (
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <p className="text-label" style={{ marginBottom: '0.75rem', color: 'var(--color-gray-500)' }}>
-                                    Color — {selectedColor}
-                                </p>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {/* Size Dropdown */}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <select
+                                value={selectedSize}
+                                onChange={e => setSelectedSize(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem 1rem',
+                                    border: '1px solid rgba(0,0,0,0.12)',
+                                    fontSize: '0.75rem',
+                                    letterSpacing: '0.1em',
+                                    textTransform: 'uppercase',
+                                    appearance: 'none',
+                                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E")`,
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'right 1rem center',
+                                    cursor: 'pointer',
+                                    backgroundColor: 'transparent',
+                                }}
+                            >
+                                <option value="">Select Size</option>
+                                {sizesForColor.map(v => (
+                                    <option key={v.id} value={v.size} disabled={v.stock_quantity <= 0}>
+                                        {v.size}{v.stock_quantity <= 0 ? ' — Sold Out' : ''}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Color selector — only show if multiple colors */}
+                        {colors.length > 1 && (
+                            <div style={{ marginBottom: '1rem' }}>
+                                <select
+                                    value={selectedColor}
+                                    onChange={e => { setSelectedColor(e.target.value); setSelectedSize('') }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem 1rem',
+                                        border: '1px solid rgba(0,0,0,0.12)',
+                                        fontSize: '0.75rem',
+                                        letterSpacing: '0.1em',
+                                        textTransform: 'uppercase',
+                                        appearance: 'none',
+                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E")`,
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'right 1rem center',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'transparent',
+                                    }}
+                                >
                                     {colors.map(color => (
-                                        <button
-                                            key={color}
-                                            onClick={() => {
-                                                setSelectedColor(color)
-                                                setSelectedSize('')
-                                            }}
-                                            style={{
-                                                padding: '0.5rem 1rem',
-                                                border: selectedColor === color
-                                                    ? '1px solid var(--color-black)'
-                                                    : '1px solid rgba(0,0,0,0.1)',
-                                                fontSize: '0.6875rem',
-                                                letterSpacing: '0.1em',
-                                                textTransform: 'uppercase',
-                                                transition: 'all 0.2s',
-                                            }}
-                                        >
-                                            {color}
-                                        </button>
+                                        <option key={color} value={color}>{color}</option>
                                     ))}
-                                </div>
+                                </select>
                             </div>
                         )}
 
-                        {/* Size */}
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <p className="text-label" style={{ marginBottom: '0.75rem', color: 'var(--color-gray-500)' }}>
-                                Size
-                            </p>
-                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                {sizesForColor.map(variant => (
-                                    <button
-                                        key={variant.id}
-                                        onClick={() => setSelectedSize(variant.size)}
-                                        disabled={variant.stock_quantity <= 0}
+                        {/* Sizing Note */}
+                        <p style={{
+                            fontSize: '0.6875rem',
+                            color: 'var(--color-gray-500)',
+                            marginBottom: '0.5rem',
+                        }}>
+                            Unisex style. Women should consider ordering 1 size smaller.
+                        </p>
+                        <p style={{
+                            fontSize: '0.625rem',
+                            letterSpacing: '0.15em',
+                            textTransform: 'uppercase',
+                            textDecoration: 'underline',
+                            textUnderlineOffset: '3px',
+                            marginBottom: '1.5rem',
+                            cursor: 'pointer',
+                        }}>
+                            SIZE GUIDE
+                        </p>
+
+                        {/* PWYW Price Input */}
+                        {product.pay_what_you_want && (
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <p className="text-label" style={{ marginBottom: '0.75rem', color: 'var(--color-gray-500)' }}>
+                                    Name Your Price (minimum {formatPrice(product.price)} USD)
+                                </p>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    border: '1px solid rgba(0,0,0,0.12)',
+                                }}>
+                                    <span style={{
+                                        padding: '0.75rem',
+                                        fontSize: '0.875rem',
+                                        borderRight: '1px solid rgba(0,0,0,0.12)',
+                                        color: 'var(--color-gray-500)',
+                                    }}>
+                                        $
+                                    </span>
+                                    <input
+                                        type="number"
+                                        min={(product.price / 100).toFixed(2)}
+                                        step="0.01"
+                                        value={customPriceDollars}
+                                        onChange={e => setCustomPriceDollars(e.target.value)}
                                         style={{
-                                            padding: '0.5rem 1rem',
-                                            minWidth: '3rem',
-                                            border: selectedSize === variant.size
-                                                ? '1px solid var(--color-black)'
-                                                : '1px solid rgba(0,0,0,0.1)',
-                                            fontSize: '0.6875rem',
-                                            letterSpacing: '0.1em',
-                                            textTransform: 'uppercase',
-                                            opacity: variant.stock_quantity <= 0 ? 0.3 : 1,
-                                            cursor: variant.stock_quantity <= 0 ? 'not-allowed' : 'pointer',
-                                            transition: 'all 0.2s',
+                                            border: 'none',
+                                            flex: 1,
+                                            padding: '0.75rem',
+                                            fontSize: '0.875rem',
                                         }}
-                                    >
-                                        {variant.size}
-                                    </button>
-                                ))}
+                                    />
+                                </div>
+                                {!isCustomPriceValid && customPriceDollars !== '' && (
+                                    <p style={{
+                                        fontSize: '0.625rem',
+                                        color: '#dc2626',
+                                        marginTop: '0.5rem',
+                                        letterSpacing: '0.05em',
+                                    }}>
+                                        Minimum price is {formatPrice(product.price)} USD
+                                    </p>
+                                )}
                             </div>
-                        </div>
-
-                        {/* Quantity */}
-                        <div style={{ marginBottom: '2rem' }}>
-                            <p className="text-label" style={{ marginBottom: '0.75rem', color: 'var(--color-gray-500)' }}>
-                                Quantity
-                            </p>
-                            <div style={{ display: 'inline-flex', alignItems: 'center', border: '1px solid rgba(0,0,0,0.1)' }}>
-                                <button
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem' }}
-                                >
-                                    −
-                                </button>
-                                <span style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', minWidth: '2rem', textAlign: 'center', borderLeft: '1px solid rgba(0,0,0,0.1)', borderRight: '1px solid rgba(0,0,0,0.1)' }}>
-                                    {quantity}
-                                </span>
-                                <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem' }}
-                                >
-                                    +
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Stock indicator */}
-                        {selectedVariant && (
-                            <p style={{
-                                fontSize: '0.625rem',
-                                letterSpacing: '0.1em',
-                                textTransform: 'uppercase',
-                                marginBottom: '1rem',
-                                color: selectedVariant.stock_quantity <= 3 ? '#c53030' : 'var(--color-gray-500)',
-                            }}>
-                                {selectedVariant.stock_quantity <= 3
-                                    ? `Only ${selectedVariant.stock_quantity} left`
-                                    : 'In Stock'}
-                            </p>
                         )}
 
                         {/* Add to Bag */}
                         <motion.button
                             whileTap={{ scale: 0.98 }}
                             onClick={handleAdd}
-                            disabled={!selectedVariant}
+                            disabled={!selectedVariant || (product.pay_what_you_want && !isCustomPriceValid)}
                             style={{
                                 width: '100%',
                                 padding: '1rem',
@@ -297,27 +325,163 @@ export default function ProductDetail() {
                                 fontWeight: 600,
                                 letterSpacing: '0.2em',
                                 textTransform: 'uppercase',
-                                opacity: selectedVariant ? 1 : 0.4,
-                                cursor: selectedVariant ? 'pointer' : 'not-allowed',
+                                opacity: selectedVariant && isCustomPriceValid ? 1 : 0.4,
+                                cursor: selectedVariant && isCustomPriceValid ? 'pointer' : 'not-allowed',
                                 transition: 'all 0.3s ease',
                                 marginBottom: '2rem',
                             }}
                         >
                             {added ? '✓ ADDED TO BAG' :
-                                !selectedColor ? 'SELECT COLOR' :
-                                    !selectedSize ? 'SELECT SIZE' :
-                                        !selectedVariant ? 'OUT OF STOCK' :
-                                            'ADD TO BAG'}
+                                !selectedSize ? 'SELECT SIZE' :
+                                    !selectedVariant ? 'OUT OF STOCK' :
+                                        'ADD TO BAG'}
                         </motion.button>
 
-                        {/* Description */}
+                        {/* DETAILS — Expandable */}
+                        <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                            <button
+                                onClick={() => setDetailsOpen(!detailsOpen)}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '1.25rem 0',
+                                    fontSize: '0.6875rem',
+                                    fontWeight: 600,
+                                    letterSpacing: '0.15em',
+                                    textTransform: 'uppercase',
+                                }}
+                            >
+                                DETAILS
+                                <span style={{
+                                    transform: detailsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.3s ease',
+                                    fontSize: '0.75rem',
+                                }}>
+                                    ▾
+                                </span>
+                            </button>
+                            <AnimatePresence>
+                                {detailsOpen && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        style={{ overflow: 'hidden' }}
+                                    >
+                                        <div style={{ paddingBottom: '1.5rem' }}>
+                                            <p style={{
+                                                fontSize: '0.75rem',
+                                                color: 'var(--color-gray-500)',
+                                                marginBottom: '1rem',
+                                                fontStyle: 'italic',
+                                            }}>
+                                                This item is final sale and not eligible for return or exchange.
+                                            </p>
+                                            <p style={{
+                                                fontSize: '0.8125rem',
+                                                lineHeight: 1.8,
+                                                color: 'var(--color-gray-600)',
+                                            }}>
+                                                {product.description}
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* ADDITIONAL INFO — Expandable */}
+                        <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                            <button
+                                onClick={() => setAdditionalOpen(!additionalOpen)}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '1.25rem 0',
+                                    fontSize: '0.6875rem',
+                                    fontWeight: 600,
+                                    letterSpacing: '0.15em',
+                                    textTransform: 'uppercase',
+                                }}
+                            >
+                                ADDITIONAL INFO
+                                <span style={{
+                                    transform: additionalOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.3s ease',
+                                    fontSize: '0.75rem',
+                                }}>
+                                    ▾
+                                </span>
+                            </button>
+                            <AnimatePresence>
+                                {additionalOpen && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        style={{ overflow: 'hidden' }}
+                                    >
+                                        <div style={{ paddingBottom: '1.5rem' }}>
+                                            <p style={{
+                                                fontSize: '0.75rem',
+                                                color: 'var(--color-gray-600)',
+                                                marginBottom: '0.75rem',
+                                            }}>
+                                                Questions?{' '}
+                                                <span style={{
+                                                    fontWeight: 600,
+                                                    letterSpacing: '0.1em',
+                                                    textTransform: 'uppercase',
+                                                    textDecoration: 'underline',
+                                                    textUnderlineOffset: '3px',
+                                                    cursor: 'pointer',
+                                                }}>
+                                                    CONTACT US
+                                                </span>
+                                            </p>
+                                            <p style={{
+                                                fontSize: '0.75rem',
+                                                color: 'var(--color-gray-600)',
+                                            }}>
+                                                Free Shipping on orders over $100. Free returns.{' '}
+                                                <span style={{
+                                                    fontWeight: 600,
+                                                    letterSpacing: '0.1em',
+                                                    textTransform: 'uppercase',
+                                                    textDecoration: 'underline',
+                                                    textUnderlineOffset: '3px',
+                                                    cursor: 'pointer',
+                                                }}>
+                                                    LEARN MORE
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* View More From Category */}
                         <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '1.5rem' }}>
-                            <p className="text-label" style={{ marginBottom: '0.75rem', color: 'var(--color-gray-500)' }}>
-                                Description
-                            </p>
-                            <p style={{ fontSize: '0.8125rem', lineHeight: 1.8, color: 'var(--color-gray-600)' }}>
-                                {product.description}
-                            </p>
+                            <Link
+                                to={`/shop?category=${encodeURIComponent(product.category)}`}
+                                style={{
+                                    display: 'block',
+                                    fontSize: '0.625rem',
+                                    letterSpacing: '0.15em',
+                                    textTransform: 'uppercase',
+                                    textDecoration: 'underline',
+                                    textUnderlineOffset: '3px',
+                                }}
+                            >
+                                VIEW MORE FROM {product.category.toUpperCase()}
+                            </Link>
                         </div>
                     </div>
                 </div>

@@ -144,7 +144,7 @@ export default function CartDrawer() {
                                                     {item.variant.size} / {item.variant.color}
                                                 </p>
                                                 <p style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                                                    {formatPrice(item.product.price)}
+                                                    {formatPrice(item.customPrice ?? item.product.price)}
                                                 </p>
 
                                                 {/* Quantity + Remove */}

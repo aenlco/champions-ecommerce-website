@@ -5,16 +5,15 @@ import PageTransition from '@/components/PageTransition'
 
 export default function OrderSuccess() {
     const [searchParams] = useSearchParams()
-    const sessionId = searchParams.get('session_id')
+    const paymentId = searchParams.get('payment_id')
     const [orderId, setOrderId] = useState<string>('')
 
     useEffect(() => {
-        // Generate a display-friendly order ID from session or random
-        const id = sessionId
-            ? `CHM-${sessionId.slice(-8).toUpperCase()}`
+        const id = paymentId
+            ? `CHM-${paymentId.slice(-8).toUpperCase()}`
             : `CHM-${Date.now().toString(36).toUpperCase()}`
         setOrderId(id)
-    }, [sessionId])
+    }, [paymentId])
 
     return (
         <PageTransition>
@@ -101,7 +100,7 @@ export default function OrderSuccess() {
                     </div>
 
                     <Link
-                        to="/collections"
+                        to="/shop"
                         style={{
                             display: 'inline-block',
                             padding: '0.875rem 2.5rem',

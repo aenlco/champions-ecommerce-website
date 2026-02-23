@@ -9,6 +9,10 @@ import ProductDetail from '@/pages/ProductDetail'
 import About from '@/pages/About'
 import Checkout from '@/pages/Checkout'
 import OrderSuccess from '@/pages/OrderSuccess'
+import SignIn from '@/pages/SignIn'
+import SignUp from '@/pages/SignUp'
+import Account from '@/pages/Account'
+import ProtectedRoute from '@/components/ProtectedRoute'
 
 export default function App() {
     const location = useLocation()
@@ -21,11 +25,18 @@ export default function App() {
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>
                         <Route path="/" element={<Home />} />
-                        <Route path="/collections" element={<Collections />} />
+                        <Route path="/shop" element={<Collections />} />
                         <Route path="/product/:slug" element={<ProductDetail />} />
                         <Route path="/about" element={<About />} />
                         <Route path="/checkout" element={<Checkout />} />
                         <Route path="/order-success" element={<OrderSuccess />} />
+                        <Route path="/sign-in" element={<SignIn />} />
+                        <Route path="/sign-up" element={<SignUp />} />
+                        <Route path="/account" element={
+                            <ProtectedRoute>
+                                <Account />
+                            </ProtectedRoute>
+                        } />
                     </Routes>
                 </AnimatePresence>
             </main>

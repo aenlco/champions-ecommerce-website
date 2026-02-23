@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/context/CartContext'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Header() {
     const [scrolled, setScrolled] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const { itemCount, toggleCart } = useCart()
+    const { user } = useAuth()
     const location = useLocation()
 
     useEffect(() => {
@@ -61,7 +63,7 @@ export default function Header() {
                 }}
                 className="hidden md:flex"
             >
-                {['COLLECTIONS', 'ABOUT'].map(link => (
+                {['SHOP', 'ABOUT'].map(link => (
                     <Link
                         key={link}
                         to={`/${link.toLowerCase()}`}
@@ -83,6 +85,25 @@ export default function Header() {
                         {link}
                     </Link>
                 ))}
+                <Link
+                    to={user ? '/account' : '/sign-in'}
+                    style={{
+                        fontSize: '0.6875rem',
+                        letterSpacing: '0.15em',
+                        fontWeight: 500,
+                        textTransform: 'uppercase',
+                        opacity: ['/account', '/sign-in'].includes(location.pathname) ? 1 : 0.6,
+                        transition: 'opacity 0.2s ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={e => {
+                        if (!['/account', '/sign-in'].includes(location.pathname)) {
+                            e.currentTarget.style.opacity = '0.6'
+                        }
+                    }}
+                >
+                    {user ? 'ACCOUNT' : 'SIGN IN'}
+                </Link>
             </nav>
 
             {/* Right: Cart + Mobile Hamburger */}
@@ -179,7 +200,7 @@ export default function Header() {
                             gap: '2.5rem',
                         }}
                     >
-                        {['COLLECTIONS', 'ABOUT'].map((link, i) => (
+                        {['SHOP', 'ABOUT'].map((link, i) => (
                             <motion.div
                                 key={link}
                                 initial={{ opacity: 0, y: 20 }}
@@ -199,6 +220,23 @@ export default function Header() {
                                 </Link>
                             </motion.div>
                         ))}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2, duration: 0.4 }}
+                        >
+                            <Link
+                                to={user ? '/account' : '/sign-in'}
+                                style={{
+                                    fontSize: '0.875rem',
+                                    letterSpacing: '0.2em',
+                                    fontWeight: 500,
+                                    textTransform: 'uppercase',
+                                }}
+                            >
+                                {user ? 'ACCOUNT' : 'SIGN IN'}
+                            </Link>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
