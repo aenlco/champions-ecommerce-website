@@ -22,11 +22,19 @@ import AdminHomepage from '@/pages/admin/AdminHomepage'
 import AdminMedia from '@/pages/admin/AdminMedia'
 import AdminMusicPlayer from '@/pages/admin/AdminMusicPlayer'
 import MusicPlayer from '@/components/MusicPlayer'
+import ComingSoon from '@/pages/ComingSoon'
+
+// Set to false to restore the full site
+const COMING_SOON = true
 
 export default function App() {
     const location = useLocation()
     const isHome = location.pathname === '/'
     const isAdmin = location.pathname.startsWith('/admin')
+
+    if (COMING_SOON && !isAdmin) {
+        return <ComingSoon />
+    }
 
     return (
         <>
