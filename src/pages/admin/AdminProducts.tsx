@@ -69,10 +69,16 @@ export default function AdminProducts() {
     }
 
     const toggleActive = async (product: Product) => {
-        await supabase
+        const { error } = await supabase
             .from('products')
             .update({ is_active: !product.is_active })
             .eq('id', product.id)
+
+        if (error) {
+            console.error('Toggle failed:', error)
+            setSyncResult({ success: false, message: `Failed to update status: ${error.message}` })
+            return
+        }
 
         await fetchProducts()
     }
