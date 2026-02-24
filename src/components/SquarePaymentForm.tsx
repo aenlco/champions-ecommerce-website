@@ -17,22 +17,30 @@ const SquarePaymentForm = forwardRef<SquarePaymentFormHandle, SquarePaymentFormP
 
         useEffect(() => {
             let card: Square.Card | null = null
+            let cancelled = false
 
             async function init() {
                 try {
                     const payments = await getSquarePayments()
                     card = await payments.card()
+                    if (cancelled) {
+                        card.destroy().catch(() => {})
+                        return
+                    }
                     await card.attach('#sq-card-container')
                     cardRef.current = card
                     setReady(true)
                 } catch (err: any) {
-                    setError(err.message || 'Failed to load payment form')
+                    if (!cancelled) {
+                        setError(err.message || 'Failed to load payment form')
+                    }
                 }
             }
 
             init()
 
             return () => {
+                cancelled = true
                 if (card) {
                     card.destroy().catch(() => {})
                 }
