@@ -280,7 +280,11 @@ export default function HomeNew() {
                                                     />
                                                 ) : (
                                                     <iframe
-                                                        src={entry.media_url}
+                                                        src={
+                                                            entry.media_url.includes('open.spotify.com') && !entry.media_url.includes('/embed/')
+                                                                ? entry.media_url.replace('open.spotify.com/', 'open.spotify.com/embed/')
+                                                                : entry.media_url
+                                                        }
                                                         style={{
                                                             width: '100%',
                                                             height: '152px',
