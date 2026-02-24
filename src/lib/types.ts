@@ -9,6 +9,8 @@ export interface Product {
     is_active: boolean
     pay_what_you_want: boolean
     created_at: string
+    square_catalog_id?: string
+    last_synced_at?: string
 }
 
 export interface ProductVariant {
@@ -18,6 +20,7 @@ export interface ProductVariant {
     color: string
     stock_quantity: number
     sku: string
+    square_variation_id?: string
 }
 
 export interface CartItem {
@@ -52,5 +55,20 @@ export interface UserProfile {
     email: string | null
     phone: string | null
     full_name: string | null
+    is_admin: boolean
     created_at: string
+}
+
+export interface HomepageEntry {
+    id: string
+    date: string
+    title: string
+    type: 'video' | 'image' | 'article' | 'link'
+    media_url?: string
+    description?: string
+    external_url?: string
+    sort_order: number
+    is_active: boolean
+    created_at: string
+    updated_at: string
 }

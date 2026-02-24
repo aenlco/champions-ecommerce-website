@@ -1,99 +1,72 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
+import { useHomepageEntries } from '@/hooks/useHomepageEntries'
+import type { HomepageEntry } from '@/lib/types'
 
-interface Entry {
-    date: string
-    title: string
-    type: 'video' | 'image' | 'article' | 'link'
-    media?: string
-    description?: string
-    externalUrl?: string
-}
-
-const ENTRIES: Entry[] = [
+// Fallback entries when Supabase isn't connected or has no data
+const FALLBACK_ENTRIES: HomepageEntry[] = [
     {
-        date: '25-07-31',
-        title: 'Project 3 Agency',
-        type: 'video',
-        media: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        id: '1', date: '25-07-31', title: 'Project 3 Agency', type: 'video',
+        media_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        sort_order: 0, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-06-28',
-        title: 'Dave Free for Bottega Veneta.',
-        type: 'image',
-        media: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+        id: '2', date: '25-06-28', title: 'Dave Free for Bottega Veneta.', type: 'image',
+        media_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+        sort_order: 1, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-06-25',
-        title: 'lose.',
-        type: 'link',
-        description: 'A new single exploring loss and redemption.',
-        externalUrl: '#',
+        id: '3', date: '25-06-25', title: 'lose.', type: 'link',
+        description: 'A new single exploring loss and redemption.', external_url: '#',
+        sort_order: 2, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-04-22',
-        title: 'Kendrick Lamar for Chanel.',
-        type: 'image',
-        media: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
+        id: '4', date: '25-04-22', title: 'Kendrick Lamar for Chanel.', type: 'image',
+        media_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
+        sort_order: 3, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-04-18',
-        title: 'Grand National Tour.',
-        type: 'article',
-        description: 'Announcing dates for the Grand National Tour. Tickets available now.',
-        externalUrl: '#',
+        id: '5', date: '25-04-18', title: 'Grand National Tour.', type: 'article',
+        description: 'Announcing dates for the Grand National Tour. Tickets available now.', external_url: '#',
+        sort_order: 4, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-04-11',
-        title: 'lather.',
-        type: 'link',
-        description: 'Stream now on all platforms.',
-        externalUrl: '#',
+        id: '6', date: '25-04-11', title: 'lather.', type: 'link',
+        description: 'Stream now on all platforms.', external_url: '#',
+        sort_order: 5, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-03-18',
-        title: 'Most Innovative Companies 2025.',
-        type: 'link',
-        externalUrl: '#',
+        id: '7', date: '25-03-18', title: 'Most Innovative Companies 2025.', type: 'link',
+        external_url: '#', sort_order: 6, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-02-09',
-        title: 'Super Bowl LIX Halftime Show. Highest rated in history.',
-        type: 'video',
-        media: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        id: '8', date: '25-02-09', title: 'Super Bowl LIX Halftime Show. Highest rated in history.', type: 'video',
+        media_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+        sort_order: 7, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-02-02',
-        title: "Dave Free wins Grammy for 'Not Like Us'.",
-        type: 'image',
-        media: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
+        id: '9', date: '25-02-02', title: "Dave Free wins Grammy for 'Not Like Us'.", type: 'image',
+        media_url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
+        sort_order: 8, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '25-02-02',
-        title: "Kendrick Lamar wins 5 Grammys for 'Not Like Us'.",
-        type: 'link',
-        externalUrl: '#',
+        id: '10', date: '25-02-02', title: "Kendrick Lamar wins 5 Grammys for 'Not Like Us'.", type: 'link',
+        external_url: '#', sort_order: 9, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '24-11-25',
-        title: 'squabble up.',
-        type: 'link',
-        externalUrl: '#',
+        id: '11', date: '24-11-25', title: 'squabble up.', type: 'link',
+        external_url: '#', sort_order: 10, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '24-11-22',
-        title: 'GNX.',
-        type: 'link',
-        externalUrl: '#',
+        id: '12', date: '24-11-22', title: 'GNX.', type: 'link',
+        external_url: '#', sort_order: 11, is_active: true, created_at: '', updated_at: '',
     },
     {
-        date: '24-08-08',
-        title: 'Super Bowl LIX. New Orleans. February 2025.',
-        type: 'link',
-        externalUrl: '#',
+        id: '13', date: '24-08-08', title: 'Super Bowl LIX. New Orleans. February 2025.', type: 'link',
+        external_url: '#', sort_order: 12, is_active: true, created_at: '', updated_at: '',
     },
 ]
 
@@ -101,6 +74,9 @@ export default function HomeNew() {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
     const { itemCount, toggleCart } = useCart()
     const { user } = useAuth()
+    const { entries: dbEntries, loading } = useHomepageEntries()
+
+    const entries = dbEntries.length > 0 ? dbEntries : FALLBACK_ENTRIES
 
     const toggle = (i: number) => {
         setExpandedIndex(prev => (prev === i ? null : i))
@@ -202,8 +178,8 @@ export default function HomeNew() {
 
             {/* Entry List */}
             <div style={{ maxWidth: '900px' }}>
-                {ENTRIES.map((entry, i) => (
-                    <div key={`${entry.date}-${i}`}>
+                {entries.map((entry, i) => (
+                    <div key={entry.id}>
                         <div
                             onClick={() => toggle(i)}
                             style={{
@@ -263,10 +239,10 @@ export default function HomeNew() {
                                     style={{ overflow: 'hidden', paddingLeft: 'calc(70px + clamp(1.5rem, 4vw, 3rem))' }}
                                 >
                                     <div style={{ paddingBottom: '1.5rem', paddingTop: '0.5rem' }}>
-                                        {entry.type === 'video' && entry.media && (
+                                        {entry.type === 'video' && entry.media_url && (
                                             <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, maxWidth: '600px' }}>
                                                 <iframe
-                                                    src={entry.media}
+                                                    src={entry.media_url}
                                                     style={{
                                                         position: 'absolute',
                                                         top: 0,
@@ -281,9 +257,9 @@ export default function HomeNew() {
                                             </div>
                                         )}
 
-                                        {entry.type === 'image' && entry.media && (
+                                        {entry.type === 'image' && entry.media_url && (
                                             <img
-                                                src={entry.media}
+                                                src={entry.media_url}
                                                 alt={entry.title}
                                                 style={{
                                                     width: '100%',
@@ -301,14 +277,14 @@ export default function HomeNew() {
                                                         fontSize: '0.75rem',
                                                         color: 'var(--color-gray-500)',
                                                         lineHeight: 1.7,
-                                                        marginBottom: entry.externalUrl ? '0.75rem' : 0,
+                                                        marginBottom: entry.external_url ? '0.75rem' : 0,
                                                     }}>
                                                         {entry.description}
                                                     </p>
                                                 )}
-                                                {entry.externalUrl && (
+                                                {entry.external_url && (
                                                     <a
-                                                        href={entry.externalUrl}
+                                                        href={entry.external_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         style={{
