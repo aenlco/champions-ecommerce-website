@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import AdminLayout from '@/components/AdminLayout'
 import { useAdminHomepageEntries } from '@/hooks/useHomepageEntries'
 import { useAdminMedia } from '@/hooks/useAdminMedia'
+import DatePicker from '@/components/DatePicker'
 import type { HomepageEntry } from '@/lib/types'
 
 const ENTRY_TYPES = ['video', 'image', 'article', 'link', 'music'] as const
@@ -182,14 +183,9 @@ export default function AdminHomepage() {
                                 <p className="text-label" style={{ color: 'var(--color-gray-400)', marginBottom: '0.375rem' }}>
                                     Date
                                 </p>
-                                <input
-                                    type="date"
-                                    value={form.date ? `20${form.date}` : ''}
-                                    onChange={e => {
-                                        const val = e.target.value
-                                        setForm(prev => ({ ...prev, date: val ? val.slice(2) : '' }))
-                                    }}
-                                    style={{ ...inputStyle, cursor: 'pointer' }}
+                                <DatePicker
+                                    value={form.date}
+                                    onChange={date => setForm(prev => ({ ...prev, date }))}
                                 />
                             </div>
                             <div>

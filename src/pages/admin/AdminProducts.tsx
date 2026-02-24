@@ -80,19 +80,24 @@ export default function AdminProducts() {
         setSyncing(false)
     }
 
-    const toggleActive = async (product: Product) => {
+    const toggleActive = async (product: ProductWithQuantity) => {
+        // Optimistic update — avoids refetch which can reorder rows
+        setProducts(prev => prev.map(p =>
+            p.id === product.id ? { ...p, is_active: !p.is_active } : p
+        ))
+
         const { error } = await supabase
             .from('products')
             .update({ is_active: !product.is_active })
             .eq('id', product.id)
 
         if (error) {
-            console.error('Toggle failed:', error)
+            // Revert on failure
+            setProducts(prev => prev.map(p =>
+                p.id === product.id ? { ...p, is_active: product.is_active } : p
+            ))
             setSyncResult({ success: false, message: `Failed to update status: ${error.message}` })
-            return
         }
-
-        await fetchProducts()
     }
 
     const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`

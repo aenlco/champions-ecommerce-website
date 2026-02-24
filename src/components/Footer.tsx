@@ -21,7 +21,7 @@ export default function Footer() {
             >
                 {/* Brand */}
                 <div>
-                    <img src="/logo.png" alt="Charles K" style={{ height: '40px', width: 'auto', marginBottom: '1rem', marginLeft: '-8px', display: 'block' }} />
+                    <img src="/logo.png" alt="Charles K" style={{ height: '40px', width: 'auto', marginBottom: '1rem', marginLeft: '-14px', display: 'block' }} />
                     <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-500)', lineHeight: 1.8, textAlign: 'left' }}>
                         Built for those who compete<br />with themselves.
                     </p>
@@ -33,24 +33,27 @@ export default function Footer() {
                         Navigate
                     </p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                        {[
-                            { label: 'Shop', to: '/shop' },
-                            { label: 'About', to: '/about' },
-                        ].map(link => (
-                            <Link
-                                key={link.to}
-                                to={link.to}
-                                style={{
-                                    fontSize: '0.75rem',
-                                    letterSpacing: '0.05em',
-                                    transition: 'opacity 0.2s',
-                                }}
-                                onMouseEnter={e => (e.currentTarget.style.opacity = '0.6')}
-                                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
+                        <Link
+                            to="/shop"
+                            style={{
+                                fontSize: '0.75rem',
+                                letterSpacing: '0.05em',
+                                transition: 'opacity 0.2s',
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.opacity = '0.6')}
+                            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                        >
+                            Shop
+                        </Link>
+                        <span
+                            style={{
+                                fontSize: '0.75rem',
+                                letterSpacing: '0.05em',
+                                color: 'var(--color-gray-400)',
+                            }}
+                        >
+                            About
+                        </span>
                     </div>
                 </div>
 
