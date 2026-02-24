@@ -120,6 +120,21 @@ export default function Checkout() {
     return (
         <PageTransition>
             <div style={{ paddingTop: '80px', minHeight: '100vh' }}>
+                <h1
+                    style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '0.875rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.2em',
+                        textTransform: 'uppercase',
+                        textAlign: 'center',
+                        maxWidth: '1100px',
+                        margin: '0 auto',
+                        padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3rem) 0',
+                    }}
+                >
+                    Checkout
+                </h1>
                 <div
                     style={{
                         display: 'grid',
@@ -133,19 +148,6 @@ export default function Checkout() {
                 >
                     {/* Left: Shipping Form */}
                     <div>
-                        <h1
-                            style={{
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.875rem',
-                                fontWeight: 700,
-                                letterSpacing: '0.2em',
-                                textTransform: 'uppercase',
-                                marginBottom: '2rem',
-                            }}
-                        >
-                            Checkout
-                        </h1>
-
                         {error && (
                             <div
                                 style={{
