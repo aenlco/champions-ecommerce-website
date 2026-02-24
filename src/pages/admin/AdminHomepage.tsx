@@ -169,13 +169,16 @@ export default function AdminHomepage() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                             <div>
                                 <p className="text-label" style={{ color: 'var(--color-gray-400)', marginBottom: '0.375rem' }}>
-                                    Date (YY-MM-DD)
+                                    Date
                                 </p>
                                 <input
-                                    value={form.date}
-                                    onChange={e => setForm(prev => ({ ...prev, date: e.target.value }))}
-                                    placeholder="25-07-31"
-                                    style={inputStyle}
+                                    type="date"
+                                    value={form.date ? `20${form.date}` : ''}
+                                    onChange={e => {
+                                        const val = e.target.value
+                                        setForm(prev => ({ ...prev, date: val ? val.slice(2) : '' }))
+                                    }}
+                                    style={{ ...inputStyle, cursor: 'pointer' }}
                                 />
                             </div>
                             <div>

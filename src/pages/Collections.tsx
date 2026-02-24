@@ -1,28 +1,22 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageTransition from '@/components/PageTransition'
 import { useProducts } from '@/hooks/useProducts'
 
-const CATEGORIES = ['All', 'Tops', 'Bottoms', 'Outerwear', 'Accessories']
-
-// Fallback products for when Supabase isn't connected yet
-const PLACEHOLDER_PRODUCTS = [
-    { id: '1', name: 'Essential Tee', slug: 'essential-tee', price: 4800, category: 'Tops', images: [], description: '', is_active: true, pay_what_you_want: false, created_at: '' },
-    { id: '2', name: 'Raw Hoodie', slug: 'raw-hoodie', price: 12800, category: 'Outerwear', images: [], description: '', is_active: true, pay_what_you_want: false, created_at: '' },
-    { id: '3', name: 'Training Shorts', slug: 'training-shorts', price: 6800, category: 'Bottoms', images: [], description: '', is_active: true, pay_what_you_want: false, created_at: '' },
-    { id: '4', name: 'Performance Tank', slug: 'performance-tank', price: 3800, category: 'Tops', images: [], description: '', is_active: true, pay_what_you_want: false, created_at: '' },
-    { id: '5', name: 'Utility Joggers', slug: 'utility-joggers', price: 9800, category: 'Bottoms', images: [], description: '', is_active: true, pay_what_you_want: false, created_at: '' },
-    { id: '6', name: 'Competition Cap', slug: 'competition-cap', price: 3200, category: 'Accessories', images: [], description: '', is_active: true, pay_what_you_want: false, created_at: '' },
-]
-
 export default function Collections() {
     const [searchParams] = useSearchParams()
     const categoryFromUrl = searchParams.get('category')
     const [activeCategory, setActiveCategory] = useState(categoryFromUrl || 'All')
-    const { products: dbProducts, loading } = useProducts()
+    const { products, loading } = useProducts()
 
-    const products = dbProducts.length > 0 ? dbProducts : PLACEHOLDER_PRODUCTS
+    // Derive categories dynamically from actual products
+    const categories = useMemo(() => {
+        const unique = [...new Set(products.map(p => p.category).filter(Boolean))]
+        unique.sort((a, b) => a.localeCompare(b))
+        return ['All', ...unique]
+    }, [products])
+
     const filtered = activeCategory === 'All'
         ? products
         : products.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase())
@@ -51,7 +45,7 @@ export default function Collections() {
                             overflowX: 'auto',
                         }}
                     >
-                        {CATEGORIES.map(cat => (
+                        {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
