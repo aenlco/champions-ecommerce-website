@@ -226,7 +226,7 @@ export default function HomeNew() {
             {/* Entry List */}
             <div style={{ maxWidth: '900px' }}>
                 {entries.map((entry, i) => (
-                    <div key={entry.id}>
+                    <div key={entry.id} id={`entry-${entry.id}`}>
                         <div
                             onClick={() => toggle(i)}
                             style={{

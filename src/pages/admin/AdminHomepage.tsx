@@ -348,13 +348,22 @@ export default function AdminHomepage() {
                                         {entry.date}
                                     </span>
                                     <div>
-                                        <span style={{
-                                            fontSize: '0.75rem',
-                                            fontWeight: 500,
-                                            opacity: entry.is_active ? 1 : 0.4,
-                                        }}>
+                                        <a
+                                            href={`/#entry-${entry.id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                                fontSize: '0.75rem',
+                                                fontWeight: 500,
+                                                opacity: entry.is_active ? 1 : 0.4,
+                                                textDecoration: 'underline',
+                                                textUnderlineOffset: '3px',
+                                                textDecorationColor: 'rgba(0,0,0,0.15)',
+                                                color: 'inherit',
+                                            }}
+                                        >
                                             {entry.title}
-                                        </span>
+                                        </a>
                                         <span style={{
                                             fontSize: '0.5625rem',
                                             color: 'var(--color-gray-400)',
