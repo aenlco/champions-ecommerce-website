@@ -70,6 +70,53 @@ const FALLBACK_ENTRIES: HomepageEntry[] = [
     },
 ]
 
+function getMusicEmbedUrl(url: string): { src: string; height: string } {
+    // Spotify: open.spotify.com/track/ID → open.spotify.com/embed/track/ID
+    if (url.includes('open.spotify.com') && !url.includes('/embed/')) {
+        return { src: url.replace('open.spotify.com/', 'open.spotify.com/embed/'), height: '152px' }
+    }
+    if (url.includes('open.spotify.com/embed/')) {
+        return { src: url, height: '152px' }
+    }
+
+    // SoundCloud: soundcloud.com/artist/track → w.soundcloud.com/player/?url=...
+    if (url.includes('soundcloud.com') && !url.includes('w.soundcloud.com/player')) {
+        const cleanUrl = url.split('?')[0]
+        return { src: `https://w.soundcloud.com/player/?url=${encodeURIComponent(cleanUrl)}&color=%23000000&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`, height: '166px' }
+    }
+    if (url.includes('w.soundcloud.com/player')) {
+        return { src: url, height: '166px' }
+    }
+
+    // Apple Music: music.apple.com → embed.music.apple.com
+    if (url.includes('music.apple.com') && !url.includes('embed.music.apple.com')) {
+        return { src: url.replace('music.apple.com', 'embed.music.apple.com'), height: '175px' }
+    }
+    if (url.includes('embed.music.apple.com')) {
+        return { src: url, height: '175px' }
+    }
+
+    // Tidal: tidal.com/browse/track/ID → embed.tidal.com/tracks/ID
+    if (url.includes('tidal.com/browse/track/')) {
+        const trackId = url.match(/track\/(\d+)/)?.[1]
+        if (trackId) return { src: `https://embed.tidal.com/tracks/${trackId}`, height: '150px' }
+    }
+    if (url.includes('embed.tidal.com')) {
+        return { src: url, height: '150px' }
+    }
+
+    // Amazon Music: music.amazon.com/albums/ID → music.amazon.com/embed/ID
+    if (url.includes('music.amazon.com') && !url.includes('/embed/')) {
+        return { src: url.replace('music.amazon.com/', 'music.amazon.com/embed/'), height: '250px' }
+    }
+
+    // Pandora: pandora.com/artist/song/TrackID → doesn't have a standard embed, use link fallback
+    // No standard embed available for Pandora
+
+    // Default fallback
+    return { src: url, height: '152px' }
+}
+
 export default function HomeNew() {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
     const { itemCount, toggleCart } = useCart()
@@ -270,32 +317,26 @@ export default function HomeNew() {
                                             />
                                         )}
 
-                                        {entry.type === 'music' && entry.media_url && (
-                                            <div style={{ maxWidth: '600px' }}>
-                                                {entry.media_url.match(/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i) ? (
-                                                    <audio
-                                                        controls
-                                                        src={entry.media_url}
-                                                        style={{ width: '100%' }}
-                                                    />
-                                                ) : (
+                                        {entry.type === 'music' && entry.media_url && (() => {
+                                            if (entry.media_url.match(/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i)) {
+                                                return (
+                                                    <div style={{ maxWidth: '600px' }}>
+                                                        <audio controls src={entry.media_url} style={{ width: '100%' }} />
+                                                    </div>
+                                                )
+                                            }
+                                            const embed = getMusicEmbedUrl(entry.media_url)
+                                            return (
+                                                <div style={{ maxWidth: '600px' }}>
                                                     <iframe
-                                                        src={
-                                                            entry.media_url.includes('open.spotify.com') && !entry.media_url.includes('/embed/')
-                                                                ? entry.media_url.replace('open.spotify.com/', 'open.spotify.com/embed/')
-                                                                : entry.media_url
-                                                        }
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '152px',
-                                                            border: 'none',
-                                                        }}
+                                                        src={embed.src}
+                                                        style={{ width: '100%', height: embed.height, border: 'none' }}
                                                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                                         loading="lazy"
                                                     />
-                                                )}
-                                            </div>
-                                        )}
+                                                </div>
+                                            )
+                                        })()}
 
                                         {(entry.type === 'article' || entry.type === 'link') && (
                                             <div>
