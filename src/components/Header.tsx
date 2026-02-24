@@ -29,7 +29,7 @@ export default function Header() {
                 left: 0,
                 right: 0,
                 zIndex: 100,
-                height: '50px',
+                height: '60px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -45,25 +45,13 @@ export default function Header() {
                 <img src="/logo.png" alt="Charles K" style={{ height: '25px', width: 'auto' }} />
             </Link>
 
-            {/* Nav — Desktop (centered) */}
-            <nav
-                style={{
-                    position: 'absolute',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    display: 'flex',
-                    gap: '2.5rem',
-                    alignItems: 'center',
-                }}
-                className="hidden md:flex"
-            >
+            {/* Right: Shop + Profile + Cart + Mobile Hamburger */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                 <Link
                     to="/shop"
                     style={{
-                        fontSize: '0.6875rem',
-                        letterSpacing: '0.15em',
-                        fontWeight: 500,
-                        textTransform: 'uppercase',
+                        display: 'flex',
+                        alignItems: 'center',
                         opacity: location.pathname === '/shop' ? 1 : 0.6,
                         transition: 'opacity 0.2s ease',
                     }}
@@ -73,13 +61,12 @@ export default function Header() {
                             e.currentTarget.style.opacity = '0.6'
                         }
                     }}
+                    aria-label="Shop"
                 >
-                    SHOP
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+                        <polygon points="12,3 22,21 2,21" />
+                    </svg>
                 </Link>
-            </nav>
-
-            {/* Right: Profile + Cart + Mobile Hamburger */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                 <Link
                     to={user ? '/account' : '/sign-in'}
                     style={{
@@ -105,16 +92,23 @@ export default function Header() {
                     onClick={toggleCart}
                     style={{
                         position: 'relative',
-                        fontSize: '0.6875rem',
-                        letterSpacing: '0.15em',
-                        fontWeight: 500,
-                        textTransform: 'uppercase',
+                        display: 'flex',
+                        alignItems: 'center',
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
+                        opacity: 0.6,
+                        transition: 'opacity 0.2s ease',
                     }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
+                    aria-label="Shopping bag"
                 >
-                    BAG
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg>
                     <AnimatePresence>
                         {itemCount > 0 && (
                             <motion.span
@@ -122,12 +116,22 @@ export default function Header() {
                                 animate={{ scale: 1 }}
                                 exit={{ scale: 0 }}
                                 style={{
-                                    marginLeft: '0.25rem',
-                                    fontSize: '0.625rem',
-                                    opacity: 0.6,
+                                    position: 'absolute',
+                                    top: '-4px',
+                                    right: '-6px',
+                                    width: '14px',
+                                    height: '14px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--color-black)',
+                                    color: 'var(--color-white)',
+                                    fontSize: '0.5rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 600,
                                 }}
                             >
-                                ({itemCount})
+                                {itemCount}
                             </motion.span>
                         )}
                     </AnimatePresence>
@@ -180,7 +184,7 @@ export default function Header() {
                         className="md:hidden"
                         style={{
                             position: 'fixed',
-                            top: '50px',
+                            top: '60px',
                             left: 0,
                             right: 0,
                             bottom: 0,

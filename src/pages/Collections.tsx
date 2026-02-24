@@ -40,19 +40,6 @@ export default function Collections() {
                         margin: '0 auto',
                     }}
                 >
-                    <h1
-                        style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '0.875rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.2em',
-                            textTransform: 'uppercase',
-                            marginBottom: '2rem',
-                        }}
-                    >
-                        Shop
-                    </h1>
-
                     {/* Category Filter */}
                     <div
                         style={{
