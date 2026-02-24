@@ -21,7 +21,7 @@ export default function Footer() {
             >
                 {/* Brand */}
                 <div>
-                    <img src="/logo.png" alt="Charles K" style={{ height: '40px', width: 'auto', marginBottom: '1rem', display: 'block' }} />
+                    <img src="/logo.png" alt="Charles K" style={{ height: '40px', width: 'auto', marginBottom: '1rem', marginLeft: '-8px', display: 'block' }} />
                     <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-500)', lineHeight: 1.8, textAlign: 'left' }}>
                         Built for those who compete<br />with themselves.
                     </p>
