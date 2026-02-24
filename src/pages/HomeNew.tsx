@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/context/CartContext'
@@ -74,7 +74,7 @@ export default function HomeNew() {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
     const { itemCount, toggleCart } = useCart()
     const { user } = useAuth()
-    const { entries: dbEntries, loading } = useHomepageEntries()
+    const { entries: dbEntries } = useHomepageEntries()
 
     const entries = dbEntries.length > 0 ? dbEntries : FALLBACK_ENTRIES
 

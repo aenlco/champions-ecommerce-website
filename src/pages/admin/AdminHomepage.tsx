@@ -72,9 +72,9 @@ export default function AdminHomepage() {
                 date: form.date,
                 title: form.title,
                 type: form.type,
-                media_url: form.media_url || null,
-                description: form.description || null,
-                external_url: form.external_url || null,
+                media_url: form.media_url || undefined,
+                description: form.description || undefined,
+                external_url: form.external_url || undefined,
                 sort_order: form.sort_order,
                 is_active: form.is_active,
             }

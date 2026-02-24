@@ -66,12 +66,6 @@ export default function AdminMedia() {
         setTimeout(() => setCopied(null), 2000)
     }
 
-    const formatFileSize = (bytes: number) => {
-        if (bytes < 1024) return `${bytes} B`
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-    }
-
     return (
         <AdminLayout>
             <div style={{ maxWidth: '1000px' }}>
