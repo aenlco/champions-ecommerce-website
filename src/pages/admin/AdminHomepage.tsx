@@ -223,7 +223,7 @@ export default function AdminHomepage() {
                         {(form.type === 'video' || form.type === 'image' || form.type === 'music') && (
                             <div style={{ marginBottom: '0.75rem' }}>
                                 <p className="text-label" style={{ color: 'var(--color-gray-400)', marginBottom: '0.375rem' }}>
-                                    {form.type === 'image' ? 'Image' : form.type === 'music' ? 'Audio / Embed' : 'Media URL'}
+                                    {form.type === 'image' ? 'Image' : form.type === 'music' ? 'Audio / Embed' : 'Video'}
                                 </p>
                                 {form.type === 'image' && (
                                     imagesLoading ? (
@@ -323,12 +323,54 @@ export default function AdminHomepage() {
                                     })()
                                 )}
                                 {form.type === 'video' && (
-                                    <input
-                                        value={form.media_url}
-                                        onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
-                                        placeholder="YouTube embed URL"
-                                        style={inputStyle}
-                                    />
+                                    imagesLoading ? (
+                                        <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-400)' }}>Loading videos...</p>
+                                    ) : (() => {
+                                        const videoFiles = imageFiles.filter(f => /\.(mp4|mov|webm|avi|mkv)$/i.test(f.name))
+                                        return videoFiles.length > 0 ? (
+                                            <div>
+                                                <select
+                                                    value={form.media_url}
+                                                    onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                    style={{
+                                                        ...inputStyle,
+                                                        cursor: 'pointer',
+                                                        appearance: 'none',
+                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                                                        backgroundRepeat: 'no-repeat',
+                                                        backgroundPosition: 'right 0.75rem center',
+                                                        paddingRight: '2rem',
+                                                    }}
+                                                >
+                                                    <option value="">Select a video...</option>
+                                                    {videoFiles.map(f => (
+                                                        <option key={f.id} value={f.url}>{f.name}</option>
+                                                    ))}
+                                                </select>
+                                                <p style={{ fontSize: '0.5625rem', color: 'var(--color-gray-400)', marginTop: '0.375rem' }}>
+                                                    Or paste a YouTube / video URL directly:
+                                                </p>
+                                                <input
+                                                    value={form.media_url}
+                                                    onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                    placeholder="YouTube embed URL or direct video URL"
+                                                    style={{ ...inputStyle, marginTop: '0.25rem' }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <input
+                                                    value={form.media_url}
+                                                    onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                    placeholder="YouTube embed URL (or upload video in Media tab)"
+                                                    style={inputStyle}
+                                                />
+                                                <p style={{ fontSize: '0.5625rem', color: 'var(--color-gray-400)', marginTop: '0.375rem' }}>
+                                                    No uploaded videos found. Upload in Media tab or paste a YouTube URL.
+                                                </p>
+                                            </div>
+                                        )
+                                    })()
                                 )}
                             </div>
                         )}
