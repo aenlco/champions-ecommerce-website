@@ -63,7 +63,7 @@ export interface HomepageEntry {
     id: string
     date: string
     title: string
-    type: 'video' | 'image' | 'article' | 'link'
+    type: 'video' | 'image' | 'article' | 'link' | 'music'
     media_url?: string
     description?: string
     external_url?: string

@@ -3,7 +3,7 @@ import AdminLayout from '@/components/AdminLayout'
 import { useAdminHomepageEntries } from '@/hooks/useHomepageEntries'
 import type { HomepageEntry } from '@/lib/types'
 
-const ENTRY_TYPES = ['video', 'image', 'article', 'link'] as const
+const ENTRY_TYPES = ['video', 'image', 'article', 'link', 'music'] as const
 
 interface EntryForm {
     date: string
@@ -206,7 +206,7 @@ export default function AdminHomepage() {
                             />
                         </div>
 
-                        {(form.type === 'video' || form.type === 'image') && (
+                        {(form.type === 'video' || form.type === 'image' || form.type === 'music') && (
                             <div style={{ marginBottom: '0.75rem' }}>
                                 <p className="text-label" style={{ color: 'var(--color-gray-400)', marginBottom: '0.375rem' }}>
                                     Media URL
@@ -214,7 +214,7 @@ export default function AdminHomepage() {
                                 <input
                                     value={form.media_url}
                                     onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
-                                    placeholder={form.type === 'video' ? 'YouTube embed URL' : 'Image URL (or paste from Media library)'}
+                                    placeholder={form.type === 'video' ? 'YouTube embed URL' : form.type === 'music' ? 'Spotify/SoundCloud/Apple Music embed URL' : 'Image URL (or paste from Media library)'}
                                     style={inputStyle}
                                 />
                             </div>

@@ -3,8 +3,12 @@ import AdminLayout from '@/components/AdminLayout'
 import { supabase } from '@/lib/supabase'
 import type { Product } from '@/lib/types'
 
+interface ProductWithQuantity extends Product {
+    total_quantity: number
+}
+
 export default function AdminProducts() {
-    const [products, setProducts] = useState<Product[]>([])
+    const [products, setProducts] = useState<ProductWithQuantity[]>([])
     const [loading, setLoading] = useState(true)
     const [syncing, setSyncing] = useState(false)
     const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -14,10 +18,18 @@ export default function AdminProducts() {
         setLoading(true)
         const { data } = await supabase
             .from('products')
-            .select('*')
+            .select('*, product_variants(stock_quantity)')
             .order('created_at', { ascending: false })
 
-        setProducts(data || [])
+        const enriched: ProductWithQuantity[] = (data || []).map((p: any) => ({
+            ...p,
+            total_quantity: (p.product_variants || []).reduce(
+                (sum: number, v: { stock_quantity: number }) => sum + (v.stock_quantity || 0),
+                0
+            ),
+        }))
+
+        setProducts(enriched)
         setLoading(false)
     }
 
@@ -187,7 +199,7 @@ export default function AdminProducts() {
                         {/* Table Header */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '60px 1fr 100px 120px 80px',
+                            gridTemplateColumns: '60px 1fr 100px 120px 60px 80px',
                             gap: '1rem',
                             padding: '0.75rem 1rem',
                             borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -196,6 +208,7 @@ export default function AdminProducts() {
                             <span className="text-label" style={{ color: 'var(--color-gray-400)' }}>Name</span>
                             <span className="text-label" style={{ color: 'var(--color-gray-400)' }}>Price</span>
                             <span className="text-label" style={{ color: 'var(--color-gray-400)' }}>Category</span>
+                            <span className="text-label" style={{ color: 'var(--color-gray-400)' }}>Qty</span>
                             <span className="text-label" style={{ color: 'var(--color-gray-400)' }}>Status</span>
                         </div>
 
@@ -205,7 +218,7 @@ export default function AdminProducts() {
                                 key={product.id}
                                 style={{
                                     display: 'grid',
-                                    gridTemplateColumns: '60px 1fr 100px 120px 80px',
+                                    gridTemplateColumns: '60px 1fr 100px 120px 60px 80px',
                                     gap: '1rem',
                                     padding: '0.75rem 1rem',
                                     borderBottom: '1px solid rgba(0,0,0,0.03)',
@@ -323,6 +336,11 @@ export default function AdminProducts() {
                                 {/* Category */}
                                 <span style={{ fontSize: '0.6875rem', color: 'var(--color-gray-500)' }}>
                                     {product.category}
+                                </span>
+
+                                {/* Quantity */}
+                                <span style={{ fontSize: '0.75rem', color: product.total_quantity > 0 ? 'var(--color-black)' : 'var(--color-gray-400)' }}>
+                                    {product.total_quantity}
                                 </span>
 
                                 {/* Status Toggle */}
