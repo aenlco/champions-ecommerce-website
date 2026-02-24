@@ -29,7 +29,7 @@ export default function Header() {
                 left: 0,
                 right: 0,
                 zIndex: 100,
-                height: '80px',
+                height: '50px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -180,7 +180,7 @@ export default function Header() {
                         className="md:hidden"
                         style={{
                             position: 'fixed',
-                            top: '80px',
+                            top: '50px',
                             left: 0,
                             right: 0,
                             bottom: 0,
