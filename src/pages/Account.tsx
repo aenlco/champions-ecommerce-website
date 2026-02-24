@@ -85,11 +85,16 @@ export default function Account() {
     return (
         <PageTransition>
             <div style={{
-                paddingTop: '100px',
                 minHeight: '100vh',
-                maxWidth: '800px',
-                margin: '0 auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
                 padding: 'clamp(1.5rem, 4vw, 3rem)',
+            }}>
+            <div style={{
+                width: '100%',
+                maxWidth: '420px',
             }}>
                 <h1 style={{
                     fontFamily: 'var(--font-mono)',
@@ -287,6 +292,7 @@ export default function Account() {
                 >
                     SIGN OUT
                 </button>
+            </div>
             </div>
         </PageTransition>
     )
