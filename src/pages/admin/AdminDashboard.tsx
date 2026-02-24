@@ -57,7 +57,7 @@ export default function AdminDashboard() {
 
     return (
         <AdminLayout>
-            <div style={{ maxWidth: '1000px' }}>
+            <div>
                 <h1 style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: '0.875rem',

@@ -68,7 +68,7 @@ export default function AdminMedia() {
 
     return (
         <AdminLayout>
-            <div style={{ maxWidth: '1000px' }}>
+            <div>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',

@@ -16,6 +16,7 @@ export default function Checkout() {
     const [error, setError] = useState<string | null>(null)
     const [form, setForm] = useState({
         email: user?.email || '',
+        phone: '',
         full_name: '',
         line1: '',
         line2: '',
@@ -176,6 +177,13 @@ export default function Checkout() {
                                     value={form.email}
                                     onChange={handleChange}
                                     required
+                                />
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    placeholder="Phone Number"
+                                    value={form.phone}
+                                    onChange={handleChange}
                                 />
                             </div>
 

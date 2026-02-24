@@ -8,6 +8,7 @@ export default function AdminProducts() {
     const [loading, setLoading] = useState(true)
     const [syncing, setSyncing] = useState(false)
     const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null)
+    const [menuOpen, setMenuOpen] = useState<string | null>(null)
 
     const fetchProducts = async () => {
         setLoading(true)
@@ -29,7 +30,6 @@ export default function AdminProducts() {
         setSyncResult(null)
 
         try {
-            // Step 1: Create a sync request nonce (uses authenticated Supabase client)
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('Not authenticated')
 
@@ -41,7 +41,6 @@ export default function AdminProducts() {
 
             if (insertError || !syncReq) throw new Error(insertError?.message || 'Failed to create sync request')
 
-            // Step 2: Call edge function with just the request ID (not a JWT)
             const response = await fetch(
                 `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-square-catalog`,
                 {
@@ -80,9 +79,14 @@ export default function AdminProducts() {
 
     const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`
 
+    const getSquareUrl = (product: Product) => {
+        if (!product.square_catalog_id) return null
+        return `https://squareup.com/dashboard/items/library/${product.square_catalog_id}`
+    }
+
     return (
         <AdminLayout>
-            <div style={{ maxWidth: '1000px' }}>
+            <div>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -177,7 +181,7 @@ export default function AdminProducts() {
                         {/* Table Header */}
                         <div style={{
                             display: 'grid',
-                            gridTemplateColumns: '60px 1fr 100px 100px 80px',
+                            gridTemplateColumns: '60px 1fr 100px 120px 80px',
                             gap: '1rem',
                             padding: '0.75rem 1rem',
                             borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -195,11 +199,12 @@ export default function AdminProducts() {
                                 key={product.id}
                                 style={{
                                     display: 'grid',
-                                    gridTemplateColumns: '60px 1fr 100px 100px 80px',
+                                    gridTemplateColumns: '60px 1fr 100px 120px 80px',
                                     gap: '1rem',
                                     padding: '0.75rem 1rem',
                                     borderBottom: '1px solid rgba(0,0,0,0.03)',
                                     alignItems: 'center',
+                                    position: 'relative',
                                 }}
                             >
                                 {/* Image */}
@@ -228,13 +233,81 @@ export default function AdminProducts() {
                                     )}
                                 </div>
 
-                                {/* Name */}
-                                <div>
-                                    <p style={{ fontSize: '0.75rem', fontWeight: 500 }}>{product.name}</p>
+                                {/* Name — clickable with dropdown */}
+                                <div style={{ position: 'relative' }}>
+                                    <button
+                                        onClick={() => setMenuOpen(menuOpen === product.id ? null : product.id)}
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: 500,
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
+                                            textUnderlineOffset: '3px',
+                                            textDecorationColor: 'rgba(0,0,0,0.15)',
+                                            textAlign: 'left',
+                                        }}
+                                    >
+                                        {product.name}
+                                    </button>
                                     {product.square_catalog_id && (
                                         <p style={{ fontSize: '0.5625rem', color: 'var(--color-gray-400)', marginTop: '0.125rem' }}>
                                             Square: {product.square_catalog_id.slice(-8)}
                                         </p>
+                                    )}
+
+                                    {/* Dropdown menu */}
+                                    {menuOpen === product.id && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '100%',
+                                            left: 0,
+                                            marginTop: '0.25rem',
+                                            backgroundColor: 'var(--color-white)',
+                                            border: '1px solid rgba(0,0,0,0.1)',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                            zIndex: 10,
+                                            minWidth: '180px',
+                                        }}>
+                                            <a
+                                                href={`/shop/${product.slug}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                    display: 'block',
+                                                    padding: '0.625rem 1rem',
+                                                    fontSize: '0.625rem',
+                                                    letterSpacing: '0.1em',
+                                                    textTransform: 'uppercase',
+                                                    color: 'var(--color-black)',
+                                                    transition: 'background-color 0.15s',
+                                                }}
+                                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--color-gray-50)')}
+                                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                            >
+                                                View on Site
+                                            </a>
+                                            {getSquareUrl(product) && (
+                                                <a
+                                                    href={getSquareUrl(product)!}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        display: 'block',
+                                                        padding: '0.625rem 1rem',
+                                                        fontSize: '0.625rem',
+                                                        letterSpacing: '0.1em',
+                                                        textTransform: 'uppercase',
+                                                        color: 'var(--color-black)',
+                                                        borderTop: '1px solid rgba(0,0,0,0.04)',
+                                                        transition: 'background-color 0.15s',
+                                                    }}
+                                                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--color-gray-50)')}
+                                                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                                >
+                                                    View in Square
+                                                </a>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
 
@@ -250,19 +323,27 @@ export default function AdminProducts() {
                                 <button
                                     onClick={() => toggleActive(product)}
                                     style={{
-                                        padding: '0.25rem 0.5rem',
-                                        fontSize: '0.5625rem',
-                                        fontWeight: 600,
-                                        letterSpacing: '0.1em',
-                                        textTransform: 'uppercase',
-                                        border: '1px solid',
-                                        borderColor: product.is_active ? 'rgba(0,128,0,0.3)' : 'rgba(0,0,0,0.12)',
-                                        color: product.is_active ? 'green' : 'var(--color-gray-400)',
-                                        backgroundColor: product.is_active ? 'rgba(0,128,0,0.04)' : 'transparent',
+                                        position: 'relative',
+                                        width: '44px',
+                                        height: '22px',
+                                        borderRadius: '11px',
+                                        border: 'none',
+                                        backgroundColor: product.is_active ? 'var(--color-black)' : 'rgba(0,0,0,0.12)',
                                         cursor: 'pointer',
+                                        transition: 'background-color 0.2s',
                                     }}
+                                    title={product.is_active ? 'Active — click to hide' : 'Hidden — click to activate'}
                                 >
-                                    {product.is_active ? 'Active' : 'Hidden'}
+                                    <span style={{
+                                        position: 'absolute',
+                                        top: '2px',
+                                        left: product.is_active ? '24px' : '2px',
+                                        width: '18px',
+                                        height: '18px',
+                                        borderRadius: '50%',
+                                        backgroundColor: 'var(--color-white)',
+                                        transition: 'left 0.2s',
+                                    }} />
                                 </button>
                             </div>
                         ))}
@@ -273,7 +354,7 @@ export default function AdminProducts() {
                 <div style={{ marginTop: '1.5rem' }}>
                     <p style={{ fontSize: '0.625rem', color: 'var(--color-gray-400)', lineHeight: 1.8 }}>
                         Products are synced from your Square catalog. Use "Sync from Square" to pull the latest
-                        items, prices, and inventory. Toggle visibility to show/hide products on the storefront.
+                        items, prices, and inventory. Toggle the switch to show/hide products on the storefront.
                     </p>
                 </div>
             </div>

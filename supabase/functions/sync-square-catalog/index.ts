@@ -51,6 +51,14 @@ interface SquareImage {
     }
 }
 
+interface SquareCategory {
+    type: string
+    id: string
+    category_data?: {
+        name: string
+    }
+}
+
 function slugify(text: string): string {
     return text
         .toLowerCase()
@@ -122,10 +130,11 @@ Deno.serve(async (req) => {
         // Fetch catalog from Square
         let allItems: SquareCatalogItem[] = []
         let allImages: SquareImage[] = []
+        let allCategories: SquareCategory[] = []
         let cursor: string | undefined
 
         do {
-            const params = new URLSearchParams({ types: "ITEM,IMAGE" })
+            const params = new URLSearchParams({ types: "ITEM,IMAGE,CATEGORY" })
             if (cursor) params.set("cursor", cursor)
 
             const response = await fetch(`${SQUARE_API_URL}/v2/catalog/list?${params}`, {
@@ -150,6 +159,7 @@ Deno.serve(async (req) => {
             const objects = data.objects || []
             allItems.push(...objects.filter((o: SquareCatalogItem) => o.type === "ITEM"))
             allImages.push(...objects.filter((o: SquareImage) => o.type === "IMAGE"))
+            allCategories.push(...objects.filter((o: SquareCategory) => o.type === "CATEGORY"))
             cursor = data.cursor
         } while (cursor)
 
@@ -158,6 +168,14 @@ Deno.serve(async (req) => {
         for (const img of allImages) {
             if (img.image_data?.url) {
                 imageMap.set(img.id, img.image_data.url)
+            }
+        }
+
+        // Build category name lookup
+        const categoryMap = new Map<string, string>()
+        for (const cat of allCategories) {
+            if (cat.category_data?.name) {
+                categoryMap.set(cat.id, cat.category_data.name)
             }
         }
 
@@ -180,8 +198,10 @@ Deno.serve(async (req) => {
             const firstVariation = item.item_data.variations?.[0]
             const price = firstVariation?.item_variation_data?.price_money?.amount || 0
 
-            // Determine category from Square category or default
-            const category = "Uncategorized"
+            // Determine category from Square category
+            const category = item.item_data.category_id
+                ? categoryMap.get(item.item_data.category_id) || "Uncategorized"
+                : "Uncategorized"
 
             const productData = {
                 square_catalog_id: item.id,

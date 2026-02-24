@@ -116,7 +116,7 @@ export default function AdminHomepage() {
 
     return (
         <AdminLayout>
-            <div style={{ maxWidth: '900px' }}>
+            <div>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
