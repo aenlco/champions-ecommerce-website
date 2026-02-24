@@ -29,7 +29,29 @@ export default function AdminProducts() {
         setSyncResult(null)
 
         try {
-            const { data, error } = await supabase.functions.invoke('sync-square-catalog')
+            // Step 1: Create a sync request nonce (uses authenticated Supabase client)
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('Not authenticated')
+
+            const { data: syncReq, error: insertError } = await supabase
+                .from('sync_requests')
+                .insert({ user_id: user.id })
+                .select('id')
+                .single()
+
+            if (insertError || !syncReq) throw new Error(insertError?.message || 'Failed to create sync request')
+
+            // Step 2: Call edge function with just the request ID (not a JWT)
+            const response = await fetch(
+                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-square-catalog`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ request_id: syncReq.id }),
+                }
+            )
+            const data = await response.json()
+            const error = response.ok ? null : { message: data.error || 'Sync failed' }
 
             if (error) {
                 setSyncResult({ success: false, message: error.message })

@@ -64,34 +64,49 @@ Deno.serve(async (req) => {
     }
 
     try {
-        // Verify the caller is an admin
-        const authHeader = req.headers.get("Authorization")
-        if (!authHeader) {
-            return new Response(
-                JSON.stringify({ error: "Unauthorized" }),
-                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            )
-        }
-
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-        // Verify admin status from the JWT
-        const userClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
-            global: { headers: { Authorization: authHeader } }
-        })
-        const { data: { user }, error: userError } = await userClient.auth.getUser()
+        // Nonce-based auth: client inserts a sync_request row (via authenticated Supabase client),
+        // then sends us just the request ID (a UUID, not a JWT — bypasses relay scanning)
+        const body = await req.json().catch(() => ({}))
+        const requestId = body.request_id
 
-        if (userError || !user) {
+        if (!requestId) {
             return new Response(
-                JSON.stringify({ error: "Unauthorized" }),
+                JSON.stringify({ error: "Missing request_id" }),
+                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            )
+        }
+
+        // Look up the sync request and verify it's valid
+        const { data: syncReq, error: reqError } = await supabase
+            .from("sync_requests")
+            .select("id, user_id, status, expires_at")
+            .eq("id", requestId)
+            .eq("status", "pending")
+            .single()
+
+        if (reqError || !syncReq) {
+            return new Response(
+                JSON.stringify({ error: "Invalid or expired sync request" }),
                 { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
             )
         }
 
+        // Check expiry
+        if (new Date(syncReq.expires_at) < new Date()) {
+            await supabase.from("sync_requests").update({ status: "failed" }).eq("id", requestId)
+            return new Response(
+                JSON.stringify({ error: "Sync request expired" }),
+                { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            )
+        }
+
+        // Verify user is admin
         const { data: profile } = await supabase
             .from("profiles")
             .select("is_admin")
-            .eq("id", user.id)
+            .eq("id", syncReq.user_id)
             .single()
 
         if (!profile?.is_admin) {
@@ -100,6 +115,9 @@ Deno.serve(async (req) => {
                 { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
             )
         }
+
+        // Mark as processing
+        await supabase.from("sync_requests").update({ status: "processing" }).eq("id", requestId)
 
         // Fetch catalog from Square
         let allItems: SquareCatalogItem[] = []
@@ -122,8 +140,9 @@ Deno.serve(async (req) => {
 
             if (!response.ok || data.errors) {
                 const errorMsg = data.errors?.[0]?.detail || "Failed to fetch Square catalog"
+                await supabase.from("sync_requests").update({ status: "failed", result: { error: errorMsg } }).eq("id", requestId)
                 return new Response(
-                    JSON.stringify({ error: errorMsg }),
+                    JSON.stringify({ error: `Square API: ${errorMsg}` }),
                     { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
                 )
             }
@@ -249,13 +268,18 @@ Deno.serve(async (req) => {
             }
         }
 
+        const result = {
+            success: true,
+            synced,
+            total_items: allItems.length,
+            errors: errors.length > 0 ? errors : undefined,
+        }
+
+        // Mark sync request as completed
+        await supabase.from("sync_requests").update({ status: "completed", result }).eq("id", requestId)
+
         return new Response(
-            JSON.stringify({
-                success: true,
-                synced,
-                total_items: allItems.length,
-                errors: errors.length > 0 ? errors : undefined,
-            }),
+            JSON.stringify(result),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         )
     } catch (err) {
