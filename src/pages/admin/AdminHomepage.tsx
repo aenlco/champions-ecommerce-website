@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from '@/components/AdminLayout'
 import { useAdminHomepageEntries } from '@/hooks/useHomepageEntries'
+import { useAdminMedia } from '@/hooks/useAdminMedia'
 import type { HomepageEntry } from '@/lib/types'
 
 const ENTRY_TYPES = ['video', 'image', 'article', 'link', 'music'] as const
@@ -29,11 +30,21 @@ const EMPTY_FORM: EntryForm = {
 
 export default function AdminHomepage() {
     const { entries, loading, createEntry, updateEntry, deleteEntry } = useAdminHomepageEntries()
+    const { files: imageFiles, loading: imagesLoading, fetchFiles: fetchImages } = useAdminMedia('homepage-images')
+    const { files: musicFiles, loading: musicLoading, fetchFiles: fetchMusic } = useAdminMedia('homepage-music')
     const [showForm, setShowForm] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [form, setForm] = useState<EntryForm>(EMPTY_FORM)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    // Fetch media files when form opens
+    useEffect(() => {
+        if (showForm) {
+            fetchImages()
+            fetchMusic()
+        }
+    }, [showForm, fetchImages, fetchMusic])
 
     const openCreate = () => {
         setEditingId(null)
@@ -212,14 +223,113 @@ export default function AdminHomepage() {
                         {(form.type === 'video' || form.type === 'image' || form.type === 'music') && (
                             <div style={{ marginBottom: '0.75rem' }}>
                                 <p className="text-label" style={{ color: 'var(--color-gray-400)', marginBottom: '0.375rem' }}>
-                                    Media URL
+                                    {form.type === 'image' ? 'Image' : form.type === 'music' ? 'Audio / Embed' : 'Media URL'}
                                 </p>
-                                <input
-                                    value={form.media_url}
-                                    onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
-                                    placeholder={form.type === 'video' ? 'YouTube embed URL' : form.type === 'music' ? 'Audio file URL (.mp3) or Spotify/SoundCloud embed URL' : 'Image URL (or paste from Media library)'}
-                                    style={inputStyle}
-                                />
+                                {form.type === 'image' && (
+                                    imagesLoading ? (
+                                        <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-400)' }}>Loading images...</p>
+                                    ) : imageFiles.length > 0 ? (
+                                        <div>
+                                            <select
+                                                value={form.media_url}
+                                                onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                style={{
+                                                    ...inputStyle,
+                                                    cursor: 'pointer',
+                                                    appearance: 'none',
+                                                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                                                    backgroundRepeat: 'no-repeat',
+                                                    backgroundPosition: 'right 0.75rem center',
+                                                    paddingRight: '2rem',
+                                                }}
+                                            >
+                                                <option value="">Select an image...</option>
+                                                {imageFiles.map(f => (
+                                                    <option key={f.id} value={f.url}>{f.name}</option>
+                                                ))}
+                                            </select>
+                                            <p style={{ fontSize: '0.5625rem', color: 'var(--color-gray-400)', marginTop: '0.375rem' }}>
+                                                Or paste a URL directly:
+                                            </p>
+                                            <input
+                                                value={form.media_url}
+                                                onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                placeholder="https://..."
+                                                style={{ ...inputStyle, marginTop: '0.25rem' }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <input
+                                                value={form.media_url}
+                                                onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                placeholder="Image URL (or upload in Media tab first)"
+                                                style={inputStyle}
+                                            />
+                                            <p style={{ fontSize: '0.5625rem', color: 'var(--color-gray-400)', marginTop: '0.375rem' }}>
+                                                No images found. Upload files in the Media tab first.
+                                            </p>
+                                        </div>
+                                    )
+                                )}
+                                {form.type === 'music' && (
+                                    musicLoading ? (
+                                        <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-400)' }}>Loading audio files...</p>
+                                    ) : (() => {
+                                        const audioFiles = musicFiles.filter(f => /\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i.test(f.name))
+                                        return audioFiles.length > 0 ? (
+                                            <div>
+                                                <select
+                                                    value={form.media_url}
+                                                    onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                    style={{
+                                                        ...inputStyle,
+                                                        cursor: 'pointer',
+                                                        appearance: 'none',
+                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+                                                        backgroundRepeat: 'no-repeat',
+                                                        backgroundPosition: 'right 0.75rem center',
+                                                        paddingRight: '2rem',
+                                                    }}
+                                                >
+                                                    <option value="">Select an audio file...</option>
+                                                    {audioFiles.map(f => (
+                                                        <option key={f.id} value={f.url}>{f.name}</option>
+                                                    ))}
+                                                </select>
+                                                <p style={{ fontSize: '0.5625rem', color: 'var(--color-gray-400)', marginTop: '0.375rem' }}>
+                                                    Or paste a URL / embed link directly:
+                                                </p>
+                                                <input
+                                                    value={form.media_url}
+                                                    onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                    placeholder="Spotify, SoundCloud, or direct audio URL"
+                                                    style={{ ...inputStyle, marginTop: '0.25rem' }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <input
+                                                    value={form.media_url}
+                                                    onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                                    placeholder="Audio URL (.mp3) or Spotify/SoundCloud embed URL"
+                                                    style={inputStyle}
+                                                />
+                                                <p style={{ fontSize: '0.5625rem', color: 'var(--color-gray-400)', marginTop: '0.375rem' }}>
+                                                    No audio files found. Upload in Media tab or paste an embed URL.
+                                                </p>
+                                            </div>
+                                        )
+                                    })()
+                                )}
+                                {form.type === 'video' && (
+                                    <input
+                                        value={form.media_url}
+                                        onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
+                                        placeholder="YouTube embed URL"
+                                        style={inputStyle}
+                                    />
+                                )}
                             </div>
                         )}
 
