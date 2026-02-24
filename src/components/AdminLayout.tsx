@@ -7,6 +7,7 @@ const NAV_ITEMS = [
     { label: 'Orders', path: '/admin/orders' },
     { label: 'Homepage', path: '/admin/homepage' },
     { label: 'Media', path: '/admin/media' },
+    { label: 'Music Player', path: '/admin/music-player' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0 clamp(1.5rem, 4vw, 3rem)',
+                padding: '0 clamp(1.5rem, 4vw, 3rem) 0 1.5rem',
                 height: '60px',
                 borderBottom: '1px solid rgba(0,0,0,0.06)',
                 backgroundColor: 'var(--color-white)',

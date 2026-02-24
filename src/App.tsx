@@ -20,6 +20,8 @@ import AdminProducts from '@/pages/admin/AdminProducts'
 import AdminOrders from '@/pages/admin/AdminOrders'
 import AdminHomepage from '@/pages/admin/AdminHomepage'
 import AdminMedia from '@/pages/admin/AdminMedia'
+import AdminMusicPlayer from '@/pages/admin/AdminMusicPlayer'
+import MusicPlayer from '@/components/MusicPlayer'
 
 export default function App() {
     const location = useLocation()
@@ -63,10 +65,14 @@ export default function App() {
                         <Route path="/admin/media" element={
                             <AdminRoute><AdminMedia /></AdminRoute>
                         } />
+                        <Route path="/admin/music-player" element={
+                            <AdminRoute><AdminMusicPlayer /></AdminRoute>
+                        } />
                     </Routes>
                 </AnimatePresence>
             </main>
             {!isAdmin && <Footer />}
+            {!isAdmin && <MusicPlayer />}
         </>
     )
 }

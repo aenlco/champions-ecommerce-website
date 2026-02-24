@@ -81,7 +81,7 @@ export default function AdminDashboard() {
                 ) : (
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                        gridTemplateColumns: 'repeat(5, 1fr)',
                         gap: '1rem',
                     }}>
                         {statCards.map(card => (

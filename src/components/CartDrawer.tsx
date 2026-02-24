@@ -192,6 +192,7 @@ export default function CartDrawer() {
                             <div
                                 style={{
                                     padding: '1.5rem',
+                                    paddingBottom: 'calc(1.5rem + 60px)',
                                     borderTop: '1px solid rgba(0,0,0,0.06)',
                                 }}
                             >
