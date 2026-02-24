@@ -269,7 +269,7 @@ export default function AdminProducts() {
                                             minWidth: '180px',
                                         }}>
                                             <a
-                                                href={`/shop/${product.slug}`}
+                                                href={`/product/${product.slug}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{
@@ -326,23 +326,22 @@ export default function AdminProducts() {
                                         position: 'relative',
                                         width: '44px',
                                         height: '22px',
-                                        borderRadius: '11px',
-                                        border: 'none',
-                                        backgroundColor: product.is_active ? 'var(--color-black)' : 'rgba(0,0,0,0.12)',
+                                        border: product.is_active ? '2px solid var(--color-black)' : '2px solid rgba(0,0,0,0.2)',
+                                        backgroundColor: product.is_active ? 'var(--color-black)' : 'transparent',
                                         cursor: 'pointer',
-                                        transition: 'background-color 0.2s',
+                                        transition: 'all 0.2s',
+                                        padding: 0,
                                     }}
                                     title={product.is_active ? 'Active — click to hide' : 'Hidden — click to activate'}
                                 >
                                     <span style={{
                                         position: 'absolute',
                                         top: '2px',
-                                        left: product.is_active ? '24px' : '2px',
-                                        width: '18px',
-                                        height: '18px',
-                                        borderRadius: '50%',
-                                        backgroundColor: 'var(--color-white)',
-                                        transition: 'left 0.2s',
+                                        left: product.is_active ? '22px' : '2px',
+                                        width: '14px',
+                                        height: '14px',
+                                        backgroundColor: product.is_active ? 'var(--color-white)' : 'rgba(0,0,0,0.25)',
+                                        transition: 'left 0.2s, background-color 0.2s',
                                     }} />
                                 </button>
                             </div>

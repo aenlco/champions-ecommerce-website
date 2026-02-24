@@ -23,7 +23,9 @@ interface SquareCatalogItem {
     item_data?: {
         name: string
         description?: string
-        category_id?: string
+        category_id?: string // deprecated
+        categories?: { id: string; ordinal?: number }[]
+        reporting_category?: { id: string; ordinal?: number }
         variations?: SquareVariation[]
         image_ids?: string[]
     }
@@ -198,10 +200,16 @@ Deno.serve(async (req) => {
             const firstVariation = item.item_data.variations?.[0]
             const price = firstVariation?.item_variation_data?.price_money?.amount || 0
 
-            // Determine category from Square category
-            const category = item.item_data.category_id
-                ? categoryMap.get(item.item_data.category_id) || "Uncategorized"
-                : "Uncategorized"
+            // Determine category from Square (new `categories` array, fallback to deprecated `category_id`)
+            let category = "Uncategorized"
+            if (item.item_data.categories && item.item_data.categories.length > 0) {
+                const catId = item.item_data.categories[0].id
+                category = categoryMap.get(catId) || "Uncategorized"
+            } else if (item.item_data.reporting_category?.id) {
+                category = categoryMap.get(item.item_data.reporting_category.id) || "Uncategorized"
+            } else if (item.item_data.category_id) {
+                category = categoryMap.get(item.item_data.category_id) || "Uncategorized"
+            }
 
             const productData = {
                 square_catalog_id: item.id,
