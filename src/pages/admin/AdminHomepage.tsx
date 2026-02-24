@@ -214,7 +214,7 @@ export default function AdminHomepage() {
                                 <input
                                     value={form.media_url}
                                     onChange={e => setForm(prev => ({ ...prev, media_url: e.target.value }))}
-                                    placeholder={form.type === 'video' ? 'YouTube embed URL' : form.type === 'music' ? 'Spotify/SoundCloud/Apple Music embed URL' : 'Image URL (or paste from Media library)'}
+                                    placeholder={form.type === 'video' ? 'YouTube embed URL' : form.type === 'music' ? 'Audio file URL (.mp3) or Spotify/SoundCloud embed URL' : 'Image URL (or paste from Media library)'}
                                     style={inputStyle}
                                 />
                             </div>

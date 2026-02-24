@@ -272,16 +272,24 @@ export default function HomeNew() {
 
                                         {entry.type === 'music' && entry.media_url && (
                                             <div style={{ maxWidth: '600px' }}>
-                                                <iframe
-                                                    src={entry.media_url}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '152px',
-                                                        border: 'none',
-                                                    }}
-                                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                                    loading="lazy"
-                                                />
+                                                {entry.media_url.match(/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i) ? (
+                                                    <audio
+                                                        controls
+                                                        src={entry.media_url}
+                                                        style={{ width: '100%' }}
+                                                    />
+                                                ) : (
+                                                    <iframe
+                                                        src={entry.media_url}
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '152px',
+                                                            border: 'none',
+                                                        }}
+                                                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                                        loading="lazy"
+                                                    />
+                                                )}
                                             </div>
                                         )}
 
