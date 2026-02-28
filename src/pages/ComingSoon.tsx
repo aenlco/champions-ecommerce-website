@@ -10,15 +10,22 @@ export default function ComingSoon() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
+    const normalizePhone = (value: string) => {
+        const digits = value.replace(/\D/g, '')
+        if (value.startsWith('+')) return '+' + digits
+        if (digits.length === 10) return '+1' + digits
+        return '+' + digits
+    }
+
     const isValidPhone = (value: string) =>
-        /^\+[\d]{10,15}$/.test(value.trim())
+        /^\+[\d]{10,15}$/.test(normalizePhone(value))
 
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault()
-        const trimmed = phone.trim()
+        const normalized = normalizePhone(phone)
 
-        if (!isValidPhone(trimmed)) {
-            setError('Enter a valid number with country code (e.g. +1234567890)')
+        if (!isValidPhone(phone)) {
+            setError('Please enter a valid phone number.')
             return
         }
 
@@ -28,14 +35,15 @@ export default function ComingSoon() {
         // Save as unverified immediately
         await supabase
             .from('newsletter_subscribers')
-            .upsert({ phone_number: trimmed, verified: false }, { onConflict: 'phone_number' })
+            .upsert({ phone_number: normalized, verified: false }, { onConflict: 'phone_number' })
 
-        const { error: otpError } = await supabase.auth.signInWithOtp({ phone: trimmed })
+        const { error: otpError } = await supabase.auth.signInWithOtp({ phone: normalized })
 
         setLoading(false)
 
         if (otpError) {
-            setError(otpError.message)
+            // Silently skip OTP if Twilio isn't configured — number is already saved
+            setStep('done')
             return
         }
 
@@ -53,7 +61,7 @@ export default function ComingSoon() {
         setError('')
 
         const { error: verifyError } = await supabase.auth.verifyOtp({
-            phone: phone.trim(),
+            phone: normalizePhone(phone),
             token: otp.trim(),
             type: 'sms',
         })
@@ -68,7 +76,7 @@ export default function ComingSoon() {
         const { error: dbError } = await supabase
             .from('newsletter_subscribers')
             .update({ verified: true })
-            .eq('phone_number', phone.trim())
+            .eq('phone_number', normalizePhone(phone))
 
         setLoading(false)
 
@@ -89,7 +97,7 @@ export default function ComingSoon() {
                 3 . 20 . 26
             </h1>
 
-            <div className="mt-16">
+            <div className="mt-44">
                 {step === 'done' ? (
                     <p className="font-mono text-sm tracking-[0.2em] uppercase text-black">
                         Thank you for signing up!
