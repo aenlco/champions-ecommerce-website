@@ -32,7 +32,7 @@ export default function App() {
     const isHome = location.pathname === '/'
     const isAdmin = location.pathname.startsWith('/admin')
 
-    if (COMING_SOON && !isAdmin) {
+    if (COMING_SOON) {
         return <ComingSoon />
     }
 
