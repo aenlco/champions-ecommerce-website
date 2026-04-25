@@ -2,9 +2,8 @@
 CREATE TABLE IF NOT EXISTS newsletter_subscribers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phone_number TEXT UNIQUE NOT NULL,
-    verified BOOLEAN DEFAULT false,
-    created_at TIMESTAMPTZ DEFAULT now(),
-    updated_at TIMESTAMPTZ DEFAULT now()
+    verified BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- RLS policies — without these, anonymous visitors can't write from the gate
