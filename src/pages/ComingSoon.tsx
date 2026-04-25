@@ -32,17 +32,25 @@ export default function ComingSoon() {
         setLoading(true)
         setError('')
 
-        // Save as unverified immediately
-        await supabase
+        // Save number first — this is the primary goal. OTP verification is secondary.
+        const { error: dbError } = await supabase
             .from('newsletter_subscribers')
             .upsert({ phone_number: normalized, verified: false }, { onConflict: 'phone_number' })
+
+        if (dbError) {
+            console.error('[coming-soon] newsletter_subscribers upsert failed:', dbError)
+            setLoading(false)
+            setError('Something went wrong. Please try again.')
+            return
+        }
 
         const { error: otpError } = await supabase.auth.signInWithOtp({ phone: normalized })
 
         setLoading(false)
 
         if (otpError) {
-            // Silently skip OTP if Twilio isn't configured — number is already saved
+            // Number is safely captured — log OTP failure but don't block the user.
+            console.error('[coming-soon] OTP send failed (number still captured):', otpError)
             setStep('done')
             return
         }
