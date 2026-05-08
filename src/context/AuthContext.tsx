@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { supabase } from '@/lib/supabase'
 import type { Session, User } from '@supabase/supabase-js'
 
+export type OAuthProvider = 'google' | 'facebook' | 'discord'
+
 interface AuthContextType {
     session: Session | null
     user: User | null
@@ -10,6 +12,7 @@ interface AuthContextType {
     signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>
     signInWithPhone: (phone: string) => Promise<{ error: Error | null }>
     verifyOtp: (phone: string, token: string) => Promise<{ error: Error | null }>
+    signInWithOAuth: (provider: OAuthProvider) => Promise<{ error: Error | null }>
     signOut: () => Promise<void>
 }
 
@@ -54,6 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error as Error | null }
     }
 
+    const signInWithOAuth = async (provider: OAuthProvider) => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: { redirectTo: `${window.location.origin}/account` },
+        })
+        return { error: error as Error | null }
+    }
+
     const signOut = async () => {
         await supabase.auth.signOut()
     }
@@ -67,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             signUpWithEmail,
             signInWithPhone,
             verifyOtp,
+            signInWithOAuth,
             signOut,
         }}>
             {children}

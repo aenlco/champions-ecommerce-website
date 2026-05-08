@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '@/components/PageTransition'
+import OAuthButtons from '@/components/OAuthButtons'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 
 export default function SignUp() {
     const navigate = useNavigate()
@@ -46,6 +48,7 @@ export default function SignUp() {
             })
         }
 
+        trackEvent('sign_up', { method: 'email' })
         navigate('/account')
     }
 
@@ -139,6 +142,8 @@ export default function SignUp() {
                             {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
                         </button>
                     </form>
+
+                    <OAuthButtons mode="sign_up" />
 
                     <p style={{
                         marginTop: '2rem',

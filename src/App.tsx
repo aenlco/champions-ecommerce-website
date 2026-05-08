@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import { Analytics } from '@vercel/analytics/react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CartDrawer from '@/components/CartDrawer'
@@ -25,7 +26,7 @@ import MusicPlayer from '@/components/MusicPlayer'
 import ComingSoon from '@/pages/ComingSoon'
 
 // Set to false to restore the full site
-const COMING_SOON = false
+const COMING_SOON = true
 
 export default function App() {
     const location = useLocation()
@@ -33,7 +34,12 @@ export default function App() {
     const isAdmin = location.pathname.startsWith('/admin')
 
     if (COMING_SOON) {
-        return <ComingSoon />
+        return (
+            <>
+                <ComingSoon />
+                <Analytics />
+            </>
+        )
     }
 
     return (
@@ -81,6 +87,7 @@ export default function App() {
             </main>
             {!isAdmin && <Footer />}
             {!isAdmin && <MusicPlayer />}
+            <Analytics />
         </>
     )
 }

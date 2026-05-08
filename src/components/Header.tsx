@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
+import { SITE_NAME } from '@/lib/brand'
 
 export default function Header() {
     const [scrolled, setScrolled] = useState(false)
@@ -42,7 +43,7 @@ export default function Header() {
         >
             {/* Logo */}
             <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-                <img src="/logo.png" alt="Charles K" style={{ height: '25px', width: 'auto' }} />
+                <img src="/logo.png" alt={SITE_NAME} style={{ height: '25px', width: 'auto' }} />
             </Link>
 
             {/* Right: Shop + Profile + Cart + Mobile Hamburger */}

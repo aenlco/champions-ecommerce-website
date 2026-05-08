@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '@/components/PageTransition'
+import OAuthButtons from '@/components/OAuthButtons'
 import { useAuth } from '@/context/AuthContext'
+import { trackEvent } from '@/lib/analytics'
 
 type AuthMode = 'email' | 'phone'
 
@@ -32,6 +34,7 @@ export default function SignIn() {
             setError(error.message)
             setLoading(false)
         } else {
+            trackEvent('login', { method: 'email' })
             navigate('/account')
         }
     }
@@ -61,6 +64,7 @@ export default function SignIn() {
             setError(error.message)
             setLoading(false)
         } else {
+            trackEvent('login', { method: 'phone' })
             navigate('/account')
         }
     }
@@ -262,6 +266,8 @@ export default function SignIn() {
                             </button>
                         </form>
                     )}
+
+                    <OAuthButtons mode="sign_in" />
 
                     <p style={{
                         marginTop: '2rem',

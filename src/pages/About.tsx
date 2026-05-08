@@ -15,7 +15,7 @@ const TIMELINE = [
     {
         year: '2025',
         title: 'The Standard',
-        text: 'Champions establishes its design language — stark minimalism, zero ornamentation, obsessive material quality. Every stitch intentional.',
+        text: 'The Champions League establishes its design language — stark minimalism, zero ornamentation, obsessive material quality. Every stitch intentional.',
     },
     {
         year: '2025',
@@ -63,7 +63,7 @@ export default function About() {
                             maxWidth: '540px',
                         }}
                     >
-                        Champions isn't about being better than anyone else. It's about the relentless pursuit of your own standard — the quiet discipline of showing up, the raw honesty of measuring yourself against yesterday.
+                        The Champions League isn't about being better than anyone else. It's about the relentless pursuit of your own standard — the quiet discipline of showing up, the raw honesty of measuring yourself against yesterday.
                     </motion.p>
                 </section>
 

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SITE_NAME } from '@/lib/brand'
 
 export default function Footer() {
     const year = new Date().getFullYear()
@@ -21,7 +22,7 @@ export default function Footer() {
             >
                 {/* Brand */}
                 <div>
-                    <img src="/logo.png" alt="Charles K" style={{ height: '40px', width: 'auto', marginBottom: '1rem', marginLeft: '-14px', display: 'block' }} />
+                    <img src="/logo.png" alt={SITE_NAME} style={{ height: '40px', width: 'auto', marginBottom: '1rem', display: 'block' }} />
                     <p style={{ fontSize: '0.6875rem', color: 'var(--color-gray-500)', lineHeight: 1.8, textAlign: 'left' }}>
                         Built for those who compete<br />with themselves.
                     </p>
@@ -114,7 +115,7 @@ export default function Footer() {
                 }}
             >
                 <p style={{ fontSize: '0.625rem', letterSpacing: '0.1em', color: 'var(--color-gray-400)' }}>
-                    © {year} CHARLES K. ALL RIGHTS RESERVED.
+                    © {year} {SITE_NAME.toUpperCase()}. ALL RIGHTS RESERVED.
                 </p>
             </div>
         </footer>
