@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 
 type Step = 'phone' | 'otp' | 'done'
 
@@ -9,6 +10,10 @@ export default function ComingSoon() {
     const [step, setStep] = useState<Step>('phone')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+
+    useEffect(() => {
+        trackEvent('champions_section_view')
+    }, [])
 
     const normalizePhone = (value: string) => {
         const digits = value.replace(/\D/g, '')
@@ -47,6 +52,8 @@ export default function ComingSoon() {
         const { error: otpError } = await supabase.auth.signInWithOtp({ phone: normalized })
 
         setLoading(false)
+
+        trackEvent('champions_section_cta_click', { step: 'phone_submit' })
 
         if (otpError) {
             // Number is safely captured — log OTP failure but don't block the user.
@@ -102,7 +109,7 @@ export default function ComingSoon() {
     return (
         <div className="fixed inset-0 bg-white flex flex-col items-center justify-center px-6">
             <h1 className="font-mono text-base tracking-[0.35em] text-black">
-                3 . 20 . 26
+                5 . 25 . 26
             </h1>
 
             <div className="mt-44">

@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { SITE_NAME } from '@/lib/brand'
 
 const NAV_ITEMS = [
     { label: 'Overview', path: '/admin' },
@@ -34,7 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                     <Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <img src="/logo.png" alt="Charles K" style={{ height: '20px', width: 'auto' }} />
+                        <img src="/logo.png" alt={SITE_NAME} style={{ height: '20px', width: 'auto' }} />
                         <span style={{
                             fontSize: '0.5625rem',
                             letterSpacing: '0.2em',

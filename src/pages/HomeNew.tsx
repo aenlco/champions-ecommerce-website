@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
 import { useHomepageEntries } from '@/hooks/useHomepageEntries'
 import type { HomepageEntry } from '@/lib/types'
+import { SITE_NAME } from '@/lib/brand'
 
 // Fallback entries when Supabase isn't connected or has no data
 const FALLBACK_ENTRIES: HomepageEntry[] = [
@@ -140,7 +141,7 @@ export default function HomeNew() {
             {/* Top bar: Logo left, Icons right */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(2rem, 5vw, 4rem)' }}>
                 <Link to="/" style={{ display: 'inline-block' }}>
-                    <img src="/logo.png" alt="Charles K" style={{ height: '25px', width: 'auto' }} />
+                    <img src="/logo.png" alt={SITE_NAME} style={{ height: '25px', width: 'auto' }} />
                 </Link>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>

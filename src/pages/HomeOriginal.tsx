@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageTransition from '@/components/PageTransition'
+import { SITE_NAME } from '@/lib/brand'
 
 export default function Home() {
     const [loaded, setLoaded] = useState(false)
@@ -47,7 +48,7 @@ export default function Home() {
                 >
                     <img
                         src="/logo.png"
-                        alt="Charles K"
+                        alt={SITE_NAME}
                         style={{
                             height: 'clamp(4rem, 14vw, 10rem)',
                             width: 'auto',

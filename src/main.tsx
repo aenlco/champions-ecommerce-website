@@ -4,8 +4,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from '@/context/AuthContext'
 import { CartProvider } from '@/context/CartContext'
 import { MusicPlayerProvider } from '@/context/MusicPlayerContext'
+import { initAnalytics } from '@/lib/analytics'
 import App from './App'
 import './index.css'
+
+initAnalytics()
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
