@@ -27,7 +27,7 @@ import MusicPlayer from '@/components/MusicPlayer'
 import ComingSoon from '@/pages/ComingSoon'
 
 // Set to false to restore the full site
-const COMING_SOON = false
+const COMING_SOON = true
 
 export default function App() {
     const location = useLocation()
