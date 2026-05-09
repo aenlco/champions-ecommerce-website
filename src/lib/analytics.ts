@@ -7,6 +7,8 @@ const GADS_LBL = import.meta.env.VITE_GOOGLE_ADS_CONVERSION_LABEL as string | un
 const META_ID = import.meta.env.VITE_META_PIXEL_ID as string | undefined
 const TIKTOK_ID = import.meta.env.VITE_TIKTOK_PIXEL_ID as string | undefined
 const SNAP_ID = import.meta.env.VITE_SNAPCHAT_PIXEL_ID as string | undefined
+const TWITTER_ID = import.meta.env.VITE_TWITTER_PIXEL_ID as string | undefined
+const PINTEREST_ID = import.meta.env.VITE_PINTEREST_TAG_ID as string | undefined
 
 let initialized = false
 
@@ -55,6 +57,17 @@ export function initAnalytics() {
     if (SNAP_ID) {
         injectInline(`(function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function(){a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};a.queue=[];var s='script',r=t.createElement(s);r.async=!0;r.src=n;var u=t.getElementsByTagName(s)[0];u.parentNode.insertBefore(r,u);})(window,document,'https://sc-static.net/scevent.min.js');snaptr('init','${SNAP_ID}');snaptr('track','PAGE_VIEW');`)
     }
+
+    // Twitter (X) Pixel — base UWT script + auto-config; per-event tracking
+    // requires conversion event IDs configured in Twitter Ads Manager.
+    if (TWITTER_ID) {
+        injectInline(`!function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments);},s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');twq('config','${TWITTER_ID}');`)
+    }
+
+    // Pinterest Tag
+    if (PINTEREST_ID) {
+        injectInline(`!function(e){if(!window.pintrk){window.pintrk=function(){window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var n=window.pintrk;n.queue=[],n.version="3.0";var t=document.createElement("script");t.async=!0,t.src=e;var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");pintrk('load','${PINTEREST_ID}');pintrk('page');`)
+    }
 }
 
 type EventName =
@@ -96,6 +109,21 @@ export function trackEvent(name: EventName, params: Record<string, unknown> = {}
                 name === 'login' ? 'LOGIN' :
                     'VIEW_CONTENT'
         window.snaptr('track', snap, params)
+    }
+
+    if (window.twq) {
+        // Twitter modern pixel routes events through 'tw-<pixel_id>-<event_id>'.
+        // Without event IDs set up in Twitter Ads, this still fires but won't
+        // attribute to a specific conversion; works as expected once IDs land.
+        window.twq('event', name, params)
+    }
+
+    if (window.pintrk) {
+        const pin =
+            name === 'sign_up' ? 'signup' :
+                name === 'login' ? 'lead' :
+                    'viewcategory'
+        window.pintrk('track', pin, params)
     }
 
     if (import.meta.env.DEV) {
