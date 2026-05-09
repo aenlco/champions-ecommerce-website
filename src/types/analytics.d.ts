@@ -11,5 +11,7 @@ declare global {
             page: () => void
         }
         snaptr?: (...args: unknown[]) => void
+        twq?: (...args: unknown[]) => void
+        pintrk?: (...args: unknown[]) => void
     }
 }
