@@ -33,11 +33,14 @@ export default function App() {
     const location = useLocation()
     const isHome = location.pathname === '/'
     const isAdmin = location.pathname.startsWith('/admin')
+    const isAuthRoute = location.pathname === '/sign-in' || location.pathname === '/sign-up'
 
-    if (COMING_SOON) {
+    // While gated, still allow admin + auth routes so the client can manage the backend.
+    if (COMING_SOON && !isAdmin && !isAuthRoute) {
         return (
             <>
                 <ComingSoon />
+                <MusicPlayer />
                 <Analytics />
                 <SpeedInsights />
             </>

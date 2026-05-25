@@ -66,7 +66,7 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     const [mode, setMode] = useState<'tracks' | 'embed'>('tracks')
     const [theme, setTheme] = useState<PlayerTheme>(() => {
         const saved = localStorage.getItem('ck-player-theme')
-        return (saved === 'light' || saved === 'dark') ? saved : 'dark'
+        return (saved === 'light' || saved === 'dark') ? saved : 'light'
     })
 
     // Persist visibility

@@ -109,7 +109,7 @@ export default function ComingSoon() {
     return (
         <div className="fixed inset-0 bg-white flex flex-col items-center justify-center px-6">
             <h1 className="font-mono text-base tracking-[0.35em] text-black">
-                5 . 29 . 26
+                6 . 5 . 26
             </h1>
 
             <div className="mt-44">
