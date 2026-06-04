@@ -25,18 +25,24 @@ import AdminMedia from '@/pages/admin/AdminMedia'
 import AdminMusicPlayer from '@/pages/admin/AdminMusicPlayer'
 import MusicPlayer from '@/components/MusicPlayer'
 import ComingSoon from '@/pages/ComingSoon'
+import { useAdmin } from '@/hooks/useAdmin'
 
 // Set to false to restore the full site
 const COMING_SOON = true
 
 export default function App() {
     const location = useLocation()
+    const { isAdmin: isAdminUser } = useAdmin()
     const isHome = location.pathname === '/'
-    const isAdmin = location.pathname.startsWith('/admin')
+    const isAdminRoute = location.pathname.startsWith('/admin')
     const isAuthRoute = location.pathname === '/sign-in' || location.pathname === '/sign-up'
 
-    // While gated, still allow admin + auth routes so the client can manage the backend.
-    if (COMING_SOON && !isAdmin && !isAuthRoute) {
+    // While gated, the full site is unlocked for signed-in admins. Everyone else
+    // (regular users + anonymous visitors) still sees the Coming Soon page, except
+    // on admin + auth routes so the client can sign in and manage the backend.
+    // While admin status is still resolving, isAdminUser is false, so visitors see
+    // the gate immediately and admins swap to the full site once the check resolves.
+    if (COMING_SOON && !isAdminUser && !isAdminRoute && !isAuthRoute) {
         return (
             <>
                 <ComingSoon />
@@ -49,8 +55,8 @@ export default function App() {
 
     return (
         <>
-            {!isHome && !isAdmin && <Header />}
-            {!isAdmin && <CartDrawer />}
+            {!isHome && !isAdminRoute && <Header />}
+            {!isAdminRoute && <CartDrawer />}
             <main>
                 <AnimatePresence mode="wait">
                     <Routes location={location} key={location.pathname}>
@@ -90,8 +96,8 @@ export default function App() {
                     </Routes>
                 </AnimatePresence>
             </main>
-            {!isAdmin && <Footer />}
-            {!isAdmin && <MusicPlayer />}
+            {!isAdminRoute && <Footer />}
+            {!isAdminRoute && <MusicPlayer />}
             <Analytics />
             <SpeedInsights />
         </>
