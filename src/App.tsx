@@ -28,7 +28,7 @@ import ComingSoon from '@/pages/ComingSoon'
 import { useAdmin } from '@/hooks/useAdmin'
 
 // Set to false to restore the full site
-const COMING_SOON = true
+const COMING_SOON = false
 
 export default function App() {
     const location = useLocation()
