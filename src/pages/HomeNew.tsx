@@ -122,9 +122,12 @@ export default function HomeNew() {
     const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
     const { itemCount, toggleCart } = useCart()
     const { user } = useAuth()
-    const { entries: dbEntries } = useHomepageEntries()
+    const { entries: dbEntries, loading } = useHomepageEntries()
 
-    const entries = dbEntries.length > 0 ? dbEntries : FALLBACK_ENTRIES
+    // Only fall back to mock data once the fetch has finished and returned nothing.
+    // While loading (incl. mobile pull-to-refresh) we render nothing instead of the
+    // mock entries, so the old placeholder data never flashes before real data loads.
+    const entries = dbEntries.length > 0 ? dbEntries : (loading ? [] : FALLBACK_ENTRIES)
 
     const toggle = (i: number) => {
         setExpandedIndex(prev => (prev === i ? null : i))
