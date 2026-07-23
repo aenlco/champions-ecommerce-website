@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import PageTransition from '@/components/PageTransition'
 import { useCart } from '@/context/CartContext'
 import { useAuth } from '@/context/AuthContext'
@@ -101,8 +101,8 @@ export default function Checkout() {
                     <p style={{ fontSize: '0.75rem', letterSpacing: '0.15em', color: 'var(--color-gray-400)', textTransform: 'uppercase' }}>
                         Your bag is empty
                     </p>
-                    <a
-                        href="/shop"
+                    <Link
+                        to="/shop"
                         style={{
                             fontSize: '0.625rem',
                             letterSpacing: '0.15em',
@@ -112,7 +112,7 @@ export default function Checkout() {
                         }}
                     >
                         Continue Shopping
-                    </a>
+                    </Link>
                 </div>
             </PageTransition>
         )
