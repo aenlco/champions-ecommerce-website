@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { useCart } from '@/context/CartContext'
 
 export default function CartDrawer() {
@@ -116,14 +117,19 @@ export default function CartDrawer() {
                                                 borderBottom: '1px solid rgba(0,0,0,0.04)',
                                             }}
                                         >
-                                            {/* Thumbnail */}
-                                            <div
+                                            {/* Thumbnail — click to return to the item's View Item page */}
+                                            <Link
+                                                to={`/product/${item.product.slug}`}
+                                                onClick={closeCart}
+                                                aria-label={`View ${item.product.name}`}
                                                 style={{
+                                                    display: 'block',
                                                     width: '80px',
                                                     height: '100px',
                                                     backgroundColor: 'var(--color-gray-100)',
                                                     flexShrink: 0,
                                                     overflow: 'hidden',
+                                                    cursor: 'pointer',
                                                 }}
                                             >
                                                 {(item.variant.image || item.product.images?.[0]) && (
@@ -133,7 +139,7 @@ export default function CartDrawer() {
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                     />
                                                 )}
-                                            </div>
+                                            </Link>
 
                                             {/* Details */}
                                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
