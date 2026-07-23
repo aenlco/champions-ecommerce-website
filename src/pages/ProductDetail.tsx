@@ -32,6 +32,17 @@ const FALLBACK_VARIANTS: ProductVariant[] = [
     { id: 'v8', product_id: 'demo-1', size: 'XL', color: 'White', stock_quantity: 6, sku: 'ET-XL-WHT' },
 ]
 
+// Square encodes some variations as "SIZE, STYLE" (e.g. "L, BLUE/RED"). Split
+// that into two dimensions so we can render a short Size + Style pair of
+// dropdowns instead of one giant combined list.
+const NO_STYLE = '__standard__'
+
+function parseVariantName(raw: string): { size: string; style: string } {
+    const idx = raw.indexOf(',')
+    if (idx === -1) return { size: raw.trim(), style: '' }
+    return { size: raw.slice(0, idx).trim(), style: raw.slice(idx + 1).trim() }
+}
+
 export default function ProductDetail() {
     const { slug } = useParams<{ slug: string }>()
     const { product: dbProduct, variants: dbVariants, loading } = useProduct(slug || '')
@@ -43,6 +54,7 @@ export default function ProductDetail() {
     const colors = [...new Set(variants.map(v => v.color))]
     const [selectedColor, setSelectedColor] = useState(colors[0] || '')
     const [selectedSize, setSelectedSize] = useState('')
+    const [selectedStyle, setSelectedStyle] = useState('')
     const [added, setAdded] = useState(false)
     const [detailsOpen, setDetailsOpen] = useState(true)
     const [additionalOpen, setAdditionalOpen] = useState(true)
@@ -77,6 +89,7 @@ export default function ProductDetail() {
         if (colors.length > 0 && (!selectedColor || !colors.includes(selectedColor))) {
             setSelectedColor(colors[0])
             setSelectedSize('')
+            setSelectedStyle('')
         }
     }, [variants])
 
@@ -87,8 +100,49 @@ export default function ProductDetail() {
         }
     }, [product.pay_what_you_want, product.price])
 
-    const sizesForColor = variants.filter(v => v.color === selectedColor)
-    const selectedVariant = variants.find(v => v.color === selectedColor && v.size === selectedSize)
+    const variantsForColor = variants.filter(v => v.color === selectedColor)
+    const hasStyles = variantsForColor.some(v => parseVariantName(v.size).style !== '')
+
+    // Size dropdown options (base size only), disabled when every variant of that size is sold out
+    const sizeOptions = [...new Set(variantsForColor.map(v => parseVariantName(v.size).size))].map(size => {
+        const allSoldOut = variantsForColor
+            .filter(v => parseVariantName(v.size).size === size)
+            .every(v => v.stock_quantity <= 0)
+        return {
+            value: size,
+            label: `${size}${allSoldOut ? ' — Sold Out' : ''}`,
+            disabled: allSoldOut,
+        }
+    })
+
+    // Style dropdown options (only when the product uses styles). Sold-out /
+    // unavailability is resolved against the currently selected size.
+    const styleOptions = hasStyles
+        ? [...new Set(variantsForColor.map(v => parseVariantName(v.size).style))].map(style => {
+            const match = selectedSize
+                ? variantsForColor.find(v => {
+                    const p = parseVariantName(v.size)
+                    return p.size === selectedSize && p.style === style
+                })
+                : undefined
+            const soldOut = !!(selectedSize && match && match.stock_quantity <= 0)
+            const unavailable = !!(selectedSize && !match)
+            const name = style === '' ? 'Standard' : style
+            return {
+                value: style === '' ? NO_STYLE : style,
+                label: `${name}${soldOut ? ' — Sold Out' : ''}`,
+                disabled: soldOut || unavailable,
+            }
+        })
+        : []
+
+    const wantStyle = selectedStyle === NO_STYLE ? '' : selectedStyle
+    const selectedVariant = (!hasStyles || !!selectedStyle) && selectedSize
+        ? variantsForColor.find(v => {
+            const p = parseVariantName(v.size)
+            return p.size === selectedSize && (hasStyles ? p.style === wantStyle : true)
+        })
+        : undefined
 
     // Swap the hero image to match the selected variation (Bug C)
     useEffect(() => {
@@ -97,7 +151,7 @@ export default function ProductDetail() {
             if (idx >= 0) setActiveIndex(idx)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedColor, selectedSize])
+    }, [selectedColor, selectedSize, selectedStyle])
 
     const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`
 
@@ -302,18 +356,25 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Size Dropdown */}
-                        <div style={{ marginBottom: '0.75rem' }}>
+                        <div style={{ marginBottom: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                             <SelectMenu
                                 value={selectedSize}
                                 onChange={setSelectedSize}
                                 placeholder="Select Size"
                                 ariaLabel="Select size"
-                                options={sizesForColor.map(v => ({
-                                    value: v.size,
-                                    label: `${v.size}${v.stock_quantity <= 0 ? ' — Sold Out' : ''}`,
-                                    disabled: v.stock_quantity <= 0,
-                                }))}
+                                options={sizeOptions}
                             />
+
+                            {/* Style Dropdown — only when the product uses "SIZE, STYLE" variations */}
+                            {hasStyles && (
+                                <SelectMenu
+                                    value={selectedStyle}
+                                    onChange={setSelectedStyle}
+                                    placeholder="Select Style"
+                                    ariaLabel="Select style"
+                                    options={styleOptions}
+                                />
+                            )}
                         </div>
 
                         {/* Color selector — only show if multiple colors */}
@@ -321,7 +382,7 @@ export default function ProductDetail() {
                             <div style={{ marginBottom: '0.75rem' }}>
                                 <SelectMenu
                                     value={selectedColor}
-                                    onChange={v => { setSelectedColor(v); setSelectedSize('') }}
+                                    onChange={v => { setSelectedColor(v); setSelectedSize(''); setSelectedStyle('') }}
                                     ariaLabel="Select color"
                                     options={colors.map(color => ({ value: color, label: color }))}
                                 />
@@ -417,8 +478,9 @@ export default function ProductDetail() {
                         >
                             {added ? 'ADDED TO BAG' :
                                 !selectedSize ? 'SELECT SIZE' :
-                                    !selectedVariant ? 'OUT OF STOCK' :
-                                        'ADD TO BAG'}
+                                    (hasStyles && !selectedStyle) ? 'SELECT STYLE' :
+                                        !selectedVariant ? 'OUT OF STOCK' :
+                                            'ADD TO BAG'}
                         </motion.button>
 
                         {/* DETAILS — Expandable */}
