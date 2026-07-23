@@ -126,9 +126,9 @@ export default function CartDrawer() {
                                                     overflow: 'hidden',
                                                 }}
                                             >
-                                                {item.product.images?.[0] && (
+                                                {(item.variant.image || item.product.images?.[0]) && (
                                                     <img
-                                                        src={item.product.images[0]}
+                                                        src={item.variant.image || item.product.images[0]}
                                                         alt={item.product.name}
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                     />
