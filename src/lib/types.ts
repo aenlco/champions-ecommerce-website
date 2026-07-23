@@ -21,6 +21,7 @@ export interface ProductVariant {
     stock_quantity: number
     sku: string
     square_variation_id?: string
+    image?: string
 }
 
 export interface CartItem {
