@@ -42,6 +42,7 @@ interface SquareVariation {
             amount: number
             currency: string
         }
+        image_ids?: string[]
     }
 }
 
@@ -242,6 +243,17 @@ Deno.serve(async (req) => {
                 for (const variation of item.item_data.variations) {
                     if (!variation.item_variation_data) continue
 
+                    // Resolve the variation's own image (falls back to null so the
+                    // gallery just uses the item-level images when absent)
+                    let variantImage: string | null = null
+                    for (const imgId of variation.item_variation_data.image_ids || []) {
+                        const url = imageMap.get(imgId)
+                        if (url) {
+                            variantImage = url
+                            break
+                        }
+                    }
+
                     const variantData = {
                         square_variation_id: variation.id,
                         product_id: product.id,
@@ -249,6 +261,7 @@ Deno.serve(async (req) => {
                         color: "Default",
                         stock_quantity: 0,
                         sku: variation.item_variation_data.sku || `${slugify(item.item_data.name)}-${variation.id.slice(-6)}`,
+                        image: variantImage,
                     }
 
                     const { error: variantError } = await supabase
