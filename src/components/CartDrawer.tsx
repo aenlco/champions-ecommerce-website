@@ -216,8 +216,9 @@ export default function CartDrawer() {
                                         {formatPrice(subtotal)}
                                     </span>
                                 </div>
-                                <a
-                                    href="/checkout"
+                                <Link
+                                    to="/checkout"
+                                    onClick={closeCart}
                                     style={{
                                         display: 'block',
                                         width: '100%',
@@ -235,7 +236,7 @@ export default function CartDrawer() {
                                     onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
                                 >
                                     CHECKOUT
-                                </a>
+                                </Link>
                             </div>
                         )}
                     </motion.div>
