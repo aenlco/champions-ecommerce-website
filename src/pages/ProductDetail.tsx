@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageTransition from '@/components/PageTransition'
@@ -47,6 +47,30 @@ export default function ProductDetail() {
     const [additionalOpen, setAdditionalOpen] = useState(true)
     const [customPriceDollars, setCustomPriceDollars] = useState('')
 
+    // Full gallery: item-level images first, then any variation-specific images (deduped, order preserved)
+    const galleryImages = [
+        ...new Set([
+            ...(product.images || []),
+            ...variants.map(v => v.image).filter((url): url is string => !!url),
+        ]),
+    ]
+    const [activeIndex, setActiveIndex] = useState(0)
+    const safeIndex = galleryImages.length > 0 ? Math.min(activeIndex, galleryImages.length - 1) : 0
+    const activeImage = galleryImages[safeIndex]
+    const touchStartX = useRef<number | null>(null)
+
+    const goPrev = () => setActiveIndex(i => (i - 1 + galleryImages.length) % galleryImages.length)
+    const goNext = () => setActiveIndex(i => (i + 1) % galleryImages.length)
+
+    const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+    const onTouchEnd = (e: React.TouchEvent) => {
+        if (touchStartX.current === null || galleryImages.length < 2) return
+        const delta = e.changedTouches[0].clientX - touchStartX.current
+        if (delta > 40) goPrev()
+        else if (delta < -40) goNext()
+        touchStartX.current = null
+    }
+
     // Sync selectedColor when variants load
     useEffect(() => {
         if (colors.length > 0 && (!selectedColor || !colors.includes(selectedColor))) {
@@ -65,6 +89,15 @@ export default function ProductDetail() {
     const sizesForColor = variants.filter(v => v.color === selectedColor)
     const selectedVariant = variants.find(v => v.color === selectedColor && v.size === selectedSize)
 
+    // Swap the hero image to match the selected variation (Bug C)
+    useEffect(() => {
+        if (selectedVariant?.image) {
+            const idx = galleryImages.indexOf(selectedVariant.image)
+            if (idx >= 0) setActiveIndex(idx)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedColor, selectedSize])
+
     const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`
 
     const customPriceCents = Math.round(parseFloat(customPriceDollars || '0') * 100)
@@ -81,6 +114,45 @@ export default function ProductDetail() {
         setAdded(true)
         setTimeout(() => setAdded(false), 2000)
     }
+
+    // Compact selector tab — shared by size + color dropdowns (Bug D)
+    const selectStyle: React.CSSProperties = {
+        width: 'auto',
+        minWidth: '9rem',
+        maxWidth: '100%',
+        padding: '0.4rem 1.75rem 0.4rem 0.75rem',
+        border: '1px solid rgba(0,0,0,0.15)',
+        borderRadius: '2px',
+        fontSize: '0.625rem',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        appearance: 'none',
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 0.6rem center',
+        cursor: 'pointer',
+        backgroundColor: 'transparent',
+    }
+
+    // Gallery prev/next arrow — overlaid on the main image
+    const arrowStyle = (side: 'left' | 'right'): React.CSSProperties => ({
+        position: 'absolute',
+        top: '50%',
+        [side]: '0.5rem',
+        transform: 'translateY(-50%)',
+        width: '2rem',
+        height: '2rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: 'none',
+        borderRadius: '50%',
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        color: 'var(--color-black)',
+        fontSize: '1.1rem',
+        lineHeight: 1,
+        cursor: 'pointer',
+    })
 
     if (loading) {
         return (
@@ -102,15 +174,13 @@ export default function ProductDetail() {
                     className="grid grid-cols-1 md:grid-cols-[1fr_1fr]"
                     style={{ maxWidth: '1400px', margin: '0 auto' }}
                 >
-                    {/* Left: Single Image */}
-                    <div
-                        style={{
-                            position: 'sticky',
-                            top: '60px',
-                            alignSelf: 'start',
-                        }}
-                    >
+                    {/* Left: Image Gallery — sticky on desktop only so it never overlaps
+                        the Add-to-Bag button on single-column mobile (Bug A) */}
+                    <div className="md:sticky md:top-[60px] md:self-start">
+                        {/* Main image */}
                         <div
+                            onTouchStart={onTouchStart}
+                            onTouchEnd={onTouchEnd}
                             style={{
                                 aspectRatio: '3/4',
                                 backgroundColor: 'var(--color-gray-100)',
@@ -118,12 +188,19 @@ export default function ProductDetail() {
                                 position: 'relative',
                             }}
                         >
-                            {product.images?.[0] ? (
-                                <img
-                                    src={product.images[0]}
-                                    alt={product.name}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
+                            {activeImage ? (
+                                <AnimatePresence initial={false} mode="wait">
+                                    <motion.img
+                                        key={activeImage}
+                                        src={activeImage}
+                                        alt={product.name}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.25 }}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                </AnimatePresence>
                             ) : (
                                 <div style={{
                                     position: 'absolute',
@@ -143,7 +220,66 @@ export default function ProductDetail() {
                                     </span>
                                 </div>
                             )}
+
+                            {/* Prev / Next arrows — only when there's more than one image */}
+                            {galleryImages.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={goPrev}
+                                        aria-label="Previous image"
+                                        style={arrowStyle('left')}
+                                    >
+                                        ‹
+                                    </button>
+                                    <button
+                                        onClick={goNext}
+                                        aria-label="Next image"
+                                        style={arrowStyle('right')}
+                                    >
+                                        ›
+                                    </button>
+                                </>
+                            )}
                         </div>
+
+                        {/* Thumbnail strip */}
+                        {galleryImages.length > 1 && (
+                            <div style={{
+                                display: 'flex',
+                                gap: '0.5rem',
+                                marginTop: '0.5rem',
+                                overflowX: 'auto',
+                                padding: '0 0.25rem',
+                            }}>
+                                {galleryImages.map((img, i) => (
+                                    <button
+                                        key={img}
+                                        onClick={() => setActiveIndex(i)}
+                                        aria-label={`View image ${i + 1}`}
+                                        style={{
+                                            flex: '0 0 auto',
+                                            width: '56px',
+                                            aspectRatio: '3/4',
+                                            padding: 0,
+                                            border: i === safeIndex
+                                                ? '1px solid var(--color-black)'
+                                                : '1px solid rgba(0,0,0,0.1)',
+                                            backgroundColor: 'var(--color-gray-100)',
+                                            cursor: 'pointer',
+                                            opacity: i === safeIndex ? 1 : 0.6,
+                                            transition: 'opacity 0.2s ease',
+                                            overflow: 'hidden',
+                                        }}
+                                    >
+                                        <img
+                                            src={img}
+                                            alt=""
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Right: Product Info */}
@@ -188,23 +324,7 @@ export default function ProductDetail() {
                             <select
                                 value={selectedSize}
                                 onChange={e => setSelectedSize(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.625rem 1rem',
-                                    borderTop: 'none',
-                                    borderLeft: 'none',
-                                    borderRight: 'none',
-                                    borderBottom: '1px solid rgba(0,0,0,0.12)',
-                                    fontSize: '0.6875rem',
-                                    letterSpacing: '0.1em',
-                                    textTransform: 'uppercase',
-                                    appearance: 'none',
-                                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E")`,
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'right 0 center',
-                                    cursor: 'pointer',
-                                    backgroundColor: 'transparent',
-                                }}
+                                style={selectStyle}
                             >
                                 <option value="">Select Size</option>
                                 {sizesForColor.map(v => (
@@ -221,23 +341,7 @@ export default function ProductDetail() {
                                 <select
                                     value={selectedColor}
                                     onChange={e => { setSelectedColor(e.target.value); setSelectedSize('') }}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.625rem 1rem',
-                                        borderTop: 'none',
-                                        borderLeft: 'none',
-                                        borderRight: 'none',
-                                        borderBottom: '1px solid rgba(0,0,0,0.12)',
-                                        fontSize: '0.6875rem',
-                                        letterSpacing: '0.1em',
-                                        textTransform: 'uppercase',
-                                        appearance: 'none',
-                                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E")`,
-                                        backgroundRepeat: 'no-repeat',
-                                        backgroundPosition: 'right 0 center',
-                                        cursor: 'pointer',
-                                        backgroundColor: 'transparent',
-                                    }}
+                                    style={selectStyle}
                                 >
                                     {colors.map(color => (
                                         <option key={color} value={color}>{color}</option>
