@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageTransition from '@/components/PageTransition'
+import SelectMenu from '@/components/SelectMenu'
 import { useProduct } from '@/hooks/useProducts'
 import { useCart } from '@/context/CartContext'
 import type { ProductVariant } from '@/lib/types'
@@ -113,25 +114,6 @@ export default function ProductDetail() {
         )
         setAdded(true)
         setTimeout(() => setAdded(false), 2000)
-    }
-
-    // Compact selector tab — shared by size + color dropdowns (Bug D)
-    const selectStyle: React.CSSProperties = {
-        width: 'auto',
-        minWidth: '9rem',
-        maxWidth: '100%',
-        padding: '0.4rem 1.75rem 0.4rem 0.75rem',
-        border: '1px solid rgba(0,0,0,0.15)',
-        borderRadius: '2px',
-        fontSize: '0.625rem',
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-        appearance: 'none',
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E")`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 0.6rem center',
-        cursor: 'pointer',
-        backgroundColor: 'transparent',
     }
 
     // Gallery prev/next arrow — overlaid on the main image
@@ -321,32 +303,28 @@ export default function ProductDetail() {
 
                         {/* Size Dropdown */}
                         <div style={{ marginBottom: '0.75rem' }}>
-                            <select
+                            <SelectMenu
                                 value={selectedSize}
-                                onChange={e => setSelectedSize(e.target.value)}
-                                style={selectStyle}
-                            >
-                                <option value="">Select Size</option>
-                                {sizesForColor.map(v => (
-                                    <option key={v.id} value={v.size} disabled={v.stock_quantity <= 0}>
-                                        {v.size}{v.stock_quantity <= 0 ? ' — Sold Out' : ''}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={setSelectedSize}
+                                placeholder="Select Size"
+                                ariaLabel="Select size"
+                                options={sizesForColor.map(v => ({
+                                    value: v.size,
+                                    label: `${v.size}${v.stock_quantity <= 0 ? ' — Sold Out' : ''}`,
+                                    disabled: v.stock_quantity <= 0,
+                                }))}
+                            />
                         </div>
 
                         {/* Color selector — only show if multiple colors */}
                         {colors.length > 1 && (
                             <div style={{ marginBottom: '0.75rem' }}>
-                                <select
+                                <SelectMenu
                                     value={selectedColor}
-                                    onChange={e => { setSelectedColor(e.target.value); setSelectedSize('') }}
-                                    style={selectStyle}
-                                >
-                                    {colors.map(color => (
-                                        <option key={color} value={color}>{color}</option>
-                                    ))}
-                                </select>
+                                    onChange={v => { setSelectedColor(v); setSelectedSize('') }}
+                                    ariaLabel="Select color"
+                                    options={colors.map(color => ({ value: color, label: color }))}
+                                />
                             </div>
                         )}
 
