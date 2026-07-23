@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageTransition from '@/components/PageTransition'
 import SelectMenu from '@/components/SelectMenu'
@@ -45,6 +45,8 @@ function parseVariantName(raw: string): { size: string; style: string } {
 
 export default function ProductDetail() {
     const { slug } = useParams<{ slug: string }>()
+    const [searchParams] = useSearchParams()
+    const preselectVariantId = searchParams.get('v')
     const { product: dbProduct, variants: dbVariants, loading } = useProduct(slug || '')
     const { addItem } = useCart()
 
@@ -84,14 +86,30 @@ export default function ProductDetail() {
         touchStartX.current = null
     }
 
-    // Sync selectedColor when variants load
+    // Sync selection when variants load. If we arrived from the cart with a
+    // ?v=<variantId>, pre-select that exact size + style (and let the image
+    // effect swap the hero to match).
     useEffect(() => {
+        if (variants.length === 0) return
+
+        const preselect = preselectVariantId
+            ? variants.find(v => v.id === preselectVariantId)
+            : undefined
+        if (preselect) {
+            const p = parseVariantName(preselect.size)
+            setSelectedColor(preselect.color)
+            setSelectedSize(p.size)
+            setSelectedStyle(p.style === '' ? NO_STYLE : p.style)
+            return
+        }
+
         if (colors.length > 0 && (!selectedColor || !colors.includes(selectedColor))) {
             setSelectedColor(colors[0])
             setSelectedSize('')
             setSelectedStyle('')
         }
-    }, [variants])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [variants, preselectVariantId])
 
     // Init custom price display when product loads
     useEffect(() => {

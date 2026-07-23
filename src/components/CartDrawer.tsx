@@ -119,7 +119,7 @@ export default function CartDrawer() {
                                         >
                                             {/* Thumbnail — click to return to the item's View Item page */}
                                             <Link
-                                                to={`/product/${item.product.slug}`}
+                                                to={`/product/${item.product.slug}?v=${encodeURIComponent(item.variant.id)}`}
                                                 onClick={closeCart}
                                                 aria-label={`View ${item.product.name}`}
                                                 style={{
